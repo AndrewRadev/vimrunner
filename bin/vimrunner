@@ -1,3 +1,10 @@
 #! /usr/bin/env ruby
 
-puts "Does nothing yet"
+$: << File.expand_path('../../lib', __FILE__)
+
+require 'pry'
+require 'vimrunner'
+
+$vim = Vimrunner::Runner.new('gvim')
+
+pry
