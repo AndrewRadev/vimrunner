@@ -56,9 +56,9 @@ module Vimrunner
       type ":e #{filename}<cr>"
     end
 
-    def insert
+    def insert(text)
       normal
-      type 'i'
+      type "i#{text}"
     end
 
     def normal
@@ -71,7 +71,7 @@ module Vimrunner
 
     def invoke_vim(*args)
       args = ['vim', '--servername', 'VIMRUNNER'] + args
-      shell *args
+      Shell.run *args
     end
 
     def write
@@ -89,10 +89,7 @@ module Vimrunner
     end
 
     def kill
-      if running?
-        Process.kill(Signal.list['TERM'], @pid)
-        true
-      end
+      Process.kill(Signal.list['TERM'], @pid) if running?
     end
 
     def running?
@@ -101,10 +98,6 @@ module Vimrunner
       true
     rescue Errno::ESRCH
       false
-    end
-
-    def shell(*command)
-      IO.popen(command) { |io| io.read }
     end
   end
 end
