@@ -80,7 +80,7 @@ module Vimrunner
     end
 
     def invoke_vim(*args)
-      args = ['vim', '--servername', 'VIMRUNNER'] + args
+      args = ['vim', '--servername', 'VIMRUNNER', *args]
       Shell.run *args
     end
 
