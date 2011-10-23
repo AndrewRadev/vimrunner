@@ -1,12 +1,16 @@
-require 'tmpdir'
+require 'fileutils'
+
+ROOT_DIR = File.expand_path('../..', __FILE__)
 
 RSpec.configure do |config|
   config.before :each do
-    @tmpdir = Dir.mktmpdir
-    Dir.chdir(@tmpdir)
+    FileUtils.cd ROOT_DIR
+    FileUtils.rm_rf 'tmp' if File.exists? 'tmp'
+    FileUtils.mkdir 'tmp'
+    FileUtils.cd 'tmp'
   end
 
   config.after :each do
-    FileUtils.remove_entry_secure @tmpdir
+    FileUtils.cd ROOT_DIR
   end
 end

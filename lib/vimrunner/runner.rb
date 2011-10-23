@@ -2,18 +2,15 @@ module Vimrunner
   # The Runner class acts as the actual proxy to a vim instance. Upon
   # initialization, a vim process is started in the background. The Runner
   # instance's public methods correspond to actions the instance will perform.
+  #
   # Use Runner#kill to manually destroy the background process.
   class Runner
-    attr_reader :executable
-
-    def initialize(vim_executable = 'vim')
-      @executable = vim_executable
-
+    def self.start_gvim
       child_stdin,   parent_stdin = IO::pipe
       parent_stdout, child_stdout = IO::pipe
       parent_stderr, child_stderr = IO::pipe
 
-      @pid = Kernel.fork do
+      pid = Kernel.fork do
         [parent_stdin, parent_stdout, parent_stderr].each { |io| io.close }
 
         STDIN.reopen(child_stdin)
@@ -22,12 +19,36 @@ module Vimrunner
 
         [child_stdin, child_stdout, child_stderr].each { |io| io.close }
 
-        exec @executable, '--servername', 'VIMRUNNER'
+        exec 'gvim', '-f', '-u', vimrc_path, '--noplugin', '--servername', 'VIMRUNNER'
       end
 
       [child_stdin, child_stdout, child_stderr].each { |io| io.close }
-      parent_stdin.sync = true
-      Process.wait
+
+      new(pid)
+    end
+
+    def self.vimrc_path
+      File.join(File.expand_path('../../..', __FILE__), 'vim', 'vimrc')
+    end
+
+    def initialize(pid)
+      @pid = pid
+      wait_until_ready
+    end
+
+    def wait_until_ready
+      while serverlist.empty? or not serverlist.include? 'VIMRUNNER'
+        sleep 0.1
+      end
+    end
+
+    def serverlist
+      %x[vim --serverlist].strip.split '\n'
+    end
+
+    def command(name)
+      normal
+      invoke_vim('--remote-expr', "EvaluateCommandOutput('#{name.to_s}')").strip
     end
 
     def edit(filename)
@@ -45,7 +66,12 @@ module Vimrunner
     end
 
     def type(keys)
-      run executable, '--servername', 'VIMRUNNER', '--remote-send', keys
+      invoke_vim '--remote-send', keys
+    end
+
+    def invoke_vim(*args)
+      args = ['vim', '--servername', 'VIMRUNNER'] + args
+      shell *args
     end
 
     def write
@@ -56,6 +82,10 @@ module Vimrunner
     def quit
       normal
       type 'ZZ'
+    end
+
+    def sync
+      command :echo
     end
 
     def kill
@@ -73,10 +103,8 @@ module Vimrunner
       false
     end
 
-    private
-
-    def run(*params)
-      system *params
+    def shell(*command)
+      IO.popen(command) { |io| io.read }
     end
   end
 end

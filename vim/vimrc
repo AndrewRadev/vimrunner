@@ -1,0 +1,7 @@
+function EvaluateCommandOutput(command)
+  redir => output
+  exe a:command
+  redir END
+
+  return output
+endfunction

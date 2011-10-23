@@ -3,30 +3,40 @@ require 'vimrunner/runner'
 
 module Vimrunner
   describe Runner do
+    def start_vim
+      Runner.start_gvim
+    end
+
+    after :each do
+      @vim and @vim.kill
+    end
+
     it "spawns a vim server with the name VIMRUNNER" do
-      vim = Runner.new('gvim')
+      @vim = start_vim
 
       IO.popen 'vim --serverlist' do |io|
         io.read.strip.should eq 'VIMRUNNER'
       end
+    end
 
-      vim.quit
+    it "is instantiated in the current directory" do
+      cwd = FileUtils.getwd
+
+      @vim = start_vim
+      @vim.command(:pwd).should eq cwd
     end
 
     it "can write a file through vim" do
-      vim = Runner.new('gvim')
+      @vim = start_vim
 
-      vim.edit 'some_file'
-      vim.insert
-      vim.type 'Contents of the file'
-      vim.write
-
-      sleep 0.1
+      @vim.edit 'some_file'
+      @vim.insert
+      @vim.type 'Contents of the file'
+      @vim.write
+      @vim.sync
 
       File.exists?('some_file').should be_true
       File.read('some_file').strip.should eq 'Contents of the file'
-
-      vim.quit
     end
   end
 end

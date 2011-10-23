@@ -5,6 +5,6 @@ $: << File.expand_path('../../lib', __FILE__)
 require 'pry'
 require 'vimrunner'
 
-$vim = Vimrunner::Runner.new('gvim')
+$vim = Vimrunner::Runner.start_gvim
 
 pry
