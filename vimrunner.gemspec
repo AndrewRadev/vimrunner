@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = '>= 1.3.6'
   s.rubyforge_project         = 'vimrunner'
-  s.files                     = Dir['{lib}/**/*.rb', 'bin/*', 'LICENSE', '*.md']
+  s.files                     = Dir['lib/**/*.rb', 'vim/*', 'bin/*', 'LICENSE', '*.md']
   s.require_path              = 'lib'
   s.executables               = ['vimrunner']
 end
