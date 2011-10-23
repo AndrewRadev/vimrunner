@@ -15,6 +15,11 @@ module Vimrunner
       end
     end
 
+    it "can return the output of a vim command" do
+      vim.command(:version).should include '+clientserver'
+      vim.command('echo "foo"').should eq 'foo'
+    end
+
     it "is instantiated in the current directory" do
       cwd = FileUtils.getwd
       vim.command(:pwd).should eq cwd

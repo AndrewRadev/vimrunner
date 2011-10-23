@@ -46,14 +46,21 @@ module Vimrunner
       %x[vim --serverlist].strip.split '\n'
     end
 
-    def command(name)
+    # Executes +vim_command+ in the vim instance and returns its output,
+    # stripping all surrounding whitespace.
+    def command(vim_command)
       normal
-      invoke_vim('--remote-expr', "EvaluateCommandOutput('#{name.to_s}')").strip
+      invoke_vim('--remote-expr', "VimrunnerEvaluateCommandOutput('#{vim_command}')").strip
     end
 
     def edit(filename)
       normal
       type ":e #{filename}<cr>"
+    end
+
+    def write
+      normal
+      type ':w<cr>'
     end
 
     def insert(text)
@@ -74,30 +81,29 @@ module Vimrunner
       Shell.run *args
     end
 
-    def write
-      normal
-      type ':w<cr>'
-    end
-
     def quit
       normal
       type 'ZZ'
     end
 
+    # Ensures that vim has finished with its previous action. This is useful
+    # when a command has been sent to the vim instance that might take a little
+    # while, and we need to check the results of the command.
+    #
+    # Example
+    #
+    #   runner.write
+    #   runner.sync
+    #   # Provided there was no error,
+    #   # the file should now be written successfully
+    #
     def sync
       command :echo
     end
 
+    # Kills the vim instance in the background by sending it a TERM signal.
     def kill
-      Process.kill(Signal.list['TERM'], @pid) if running?
-    end
-
-    def running?
-      return false unless @pid
-      Process.getpgid(@pid)
-      true
-    rescue Errno::ESRCH
-      false
+      Shell.kill(@pid)
     end
   end
 end

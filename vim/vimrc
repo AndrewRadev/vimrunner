@@ -1,4 +1,4 @@
-function EvaluateCommandOutput(command)
+function VimrunnerEvaluateCommandOutput(command)
   redir => output
   exe a:command
   redir END
