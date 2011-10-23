@@ -1,3 +1,5 @@
+require 'vimrunner/shell'
+
 module Vimrunner
 
   # The Runner class acts as the actual proxy to a vim instance. Upon
