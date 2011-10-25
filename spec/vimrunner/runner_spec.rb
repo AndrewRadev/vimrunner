@@ -29,7 +29,7 @@ module Vimrunner
       vim.edit 'some_file'
       vim.insert 'Contents of the file'
       vim.write
-      vim.sync
+      vim.wait_until_ready
 
       File.exists?('some_file').should be_true
       File.read('some_file').strip.should eq 'Contents of the file'
