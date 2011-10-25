@@ -51,7 +51,7 @@ module Vimrunner
 
     # Executes +vim_command+ in the vim instance and returns its output,
     # stripping all surrounding whitespace.
-    def command(vim_command)
+    def please_sir_can_you_do_this(vim_command)
       normal
       invoke_vim('--remote-expr', "VimrunnerEvaluateCommandOutput('#{vim_command}')").strip
     end
