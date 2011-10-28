@@ -31,6 +31,21 @@ module Vimrunner
       File.read('some_file').strip.should eq 'Contents of the file'
     end
 
+    describe "#search" do
+      it "positions the cursor on the search term" do
+        vim.edit 'some_file'
+        vim.insert 'one two'
+
+        vim.search 'two'
+        vim.normal 'dw'
+
+        vim.write
+        vim.wait_until_ready
+
+        File.read('some_file').strip.should eq 'one'
+      end
+    end
+
     describe "#command" do
       it "can return the output of a vim command" do
         vim.command(:version).should include '+clientserver'

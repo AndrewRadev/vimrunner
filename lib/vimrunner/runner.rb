@@ -56,6 +56,11 @@ module Vimrunner
       end
     end
 
+    def search(text)
+      normal
+      type "/#{text}<cr>"
+    end
+
     def edit(filename)
       normal
       type ":e #{filename}<cr>"
@@ -66,13 +71,13 @@ module Vimrunner
       type ':w<cr>'
     end
 
-    def insert(text)
+    def insert(text = '')
       normal
       type "i#{text}"
     end
 
-    def normal
-      type '<c-\\><c-n>'
+    def normal(text = '')
+      type "<c-\\><c-n>#{text}"
     end
 
     def quit
