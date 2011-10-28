@@ -16,6 +16,9 @@ $vim.write                  # write file to disk
 For more examples of what you can do, you could take a look at the specs, they
 should be fairly readable.
 
+Note that this should work on a Linux box, but probably won't on a Mac. I'm
+assuming you'd need to change the binary to `mvim` at the very least.
+
 This is still fairly experimental, so use with caution. Any issue reports or
 contributions are very welcome on the
 [github issue tracker](https://github.com/AndrewRadev/Vimrunner/issues)
