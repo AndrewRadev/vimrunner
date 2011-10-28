@@ -2,9 +2,9 @@
 
 $: << File.expand_path('../../lib', __FILE__)
 
-require 'pry'
+require 'irb'
 require 'vimrunner'
 
 $vim = Vimrunner::Runner.start_gvim
 
-pry
+IRB.start
