@@ -1,4 +1,5 @@
 require 'vimrunner/shell'
+require 'vimrunner/errors'
 
 module Vimrunner
 
@@ -49,7 +50,10 @@ module Vimrunner
     # stripping all surrounding whitespace.
     def command(vim_command)
       normal
-      invoke_vim('--remote-expr', "VimrunnerEvaluateCommandOutput('#{vim_command}')").strip
+
+      invoke_vim('--remote-expr', "VimrunnerEvaluateCommandOutput('#{vim_command.to_s}')").strip.tap do |output|
+        raise InvalidCommandError if output =~ /^Vim:E\d+:/
+      end
     end
 
     def edit(filename)

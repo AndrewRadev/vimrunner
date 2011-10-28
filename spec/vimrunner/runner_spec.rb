@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'vimrunner/runner'
+require 'vimrunner/errors'
 
 module Vimrunner
   describe Runner do
@@ -15,11 +16,6 @@ module Vimrunner
       end
     end
 
-    it "can return the output of a vim command" do
-      vim.command(:version).should include '+clientserver'
-      vim.command('echo "foo"').should eq 'foo'
-    end
-
     it "is instantiated in the current directory" do
       cwd = FileUtils.getwd
       vim.command(:pwd).should eq cwd
@@ -33,6 +29,19 @@ module Vimrunner
 
       File.exists?('some_file').should be_true
       File.read('some_file').strip.should eq 'Contents of the file'
+    end
+
+    describe "#command" do
+      it "can return the output of a vim command" do
+        vim.command(:version).should include '+clientserver'
+        vim.command('echo "foo"').should eq 'foo'
+      end
+
+      it "raises an error for a non-existent vim command" do
+        expect do
+          vim.command(:nonexistent)
+        end.to raise_error Vimrunner::InvalidCommandError
+      end
     end
   end
 end

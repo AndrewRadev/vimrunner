@@ -1,7 +1,13 @@
-function VimrunnerEvaluateCommandOutput(command)
-  redir => output
-  exe a:command
-  redir END
+function! VimrunnerEvaluateCommandOutput(command)
+  let base_command = split(a:command, '\s\+')[0]
+
+  if !exists(':'.base_command)
+    let output = 'Vim:E492: Not an editor command: '.base_command
+  else
+    redir => output
+    silent exe a:command
+    redir END
+  endif
 
   return output
 endfunction
