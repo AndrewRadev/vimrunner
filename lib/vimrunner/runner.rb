@@ -80,6 +80,22 @@ module Vimrunner
       type "/#{text}<cr>"
     end
 
+    # Sets a setting in vim. If +value+ is nil, the setting is considered to be
+    # a boolean.
+    #
+    # Examples:
+    #
+    #   vim.set 'expandtab'  # invokes ":set expandtab"
+    #   vim.set 'tabstop', 3 # invokes ":set tabstop=3"
+    #
+    def set(setting, value = nil)
+      if value
+        command "set #{setting}=#{value}"
+      else
+        command "set #{setting}"
+      end
+    end
+
     # Edits the file +filename+ with Vim.
     def edit(filename)
       invoke_vim '--remote', filename

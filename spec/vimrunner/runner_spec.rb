@@ -42,6 +42,21 @@ module Vimrunner
       vim.command('Okay').should eq 'OK'
     end
 
+    describe "#set" do
+      it "activates a boolean setting" do
+        vim.set 'expandtab'
+        vim.command('echo &expandtab').should eq '1'
+
+        vim.set 'noexpandtab'
+        vim.command('echo &expandtab').should eq '0'
+      end
+
+      it "sets a setting to a given value" do
+        vim.set 'tabstop', 3
+        vim.command('echo &tabstop').should eq '3'
+      end
+    end
+
     describe "#search" do
       it "positions the cursor on the search term" do
         vim.edit 'some_file'
