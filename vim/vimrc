@@ -1,3 +1,9 @@
+set nocompatible
+
+filetype plugin on
+filetype indent on
+syntax on
+
 function! VimrunnerEvaluateCommandOutput(command)
   let base_command = split(a:command, '\s\+')[0]
 
