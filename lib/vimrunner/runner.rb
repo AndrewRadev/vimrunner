@@ -63,28 +63,31 @@ module Vimrunner
       type "/#{text}<cr>"
     end
 
+    # Edits the file +filename+ with Vim.
     def edit(filename)
-      normal
-      type ":e #{filename}<cr>"
+      invoke_vim '--remote', filename
     end
 
+    # Writes the file being edited to disk. Note that you need to set the
+    # file's name first by using Runner#edit.
     def write
       normal
       type ':w<cr>'
     end
 
+    # Switches vim to insert mode and types in the given text.
     def insert(text = '')
       normal
       type "i#{text}"
     end
 
-    def normal(text = '')
-      type "<c-\\><c-n>#{text}"
+    # Switches vim to insert mode and types in the given keys.
+    def normal(keys = '')
+      type "<c-\\><c-n>#{keys}"
     end
 
     def quit
-      normal
-      type 'ZZ'
+      normal 'ZZ'
     end
 
     # Kills the vim instance in the background by sending it a TERM signal.
