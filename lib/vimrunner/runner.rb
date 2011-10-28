@@ -102,21 +102,18 @@ module Vimrunner
     # the command manually. This is necessary to avoid the vim instance getting
     # focus.
     def edit(filename)
-      normal
-      type ":e #{filename}<cr>"
+      normal ":e #{filename}<cr>"
     end
 
     # Writes the file being edited to disk. Note that you need to set the
     # file's name first by using Runner#edit.
     def write
-      normal
-      type ':w<cr>'
+      normal ':w<cr>'
     end
 
     # Switches vim to insert mode and types in the given text.
     def insert(text = '')
-      normal
-      type "i#{text}"
+      normal "i#{text}"
     end
 
     # Switches vim to insert mode and types in the given keys.
