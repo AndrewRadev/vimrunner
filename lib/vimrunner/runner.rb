@@ -56,6 +56,8 @@ module Vimrunner
       end
     end
 
+    # Starts a search in vim for the given text. The result is that the cursor
+    # is positioned on its first occurrence.
     def search(text)
       normal
       type "/#{text}<cr>"
