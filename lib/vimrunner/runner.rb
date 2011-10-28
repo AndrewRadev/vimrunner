@@ -42,6 +42,23 @@ module Vimrunner
       wait_until_started
     end
 
+    # Adds a plugin to Vim's runtime. Initially, Vim is started without
+    # sourcing any plugins to ensure a clean state. This method can be used to
+    # populate the instance's environment.
+    #
+    # dir          - The base directory of the plugin, the one that contains
+    #                its autoload, plugin, ftplugin, etc. directories.
+    # entry_script - The vim script that's runtime'd to initialize the plugin.
+    #
+    # Example:
+    #
+    #   vim.add_plugin 'rails', 'plugin/rails.vim'
+    #
+    def add_plugin(dir, entry_script)
+      command("set runtimepath+=#{dir}")
+      command("runtime #{entry_script}")
+    end
+
     def type(keys)
       invoke_vim '--remote-send', keys
     end

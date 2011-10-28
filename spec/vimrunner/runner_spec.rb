@@ -31,6 +31,17 @@ module Vimrunner
       File.read('some_file').strip.should eq 'Contents of the file'
     end
 
+    it "can add a plugin for vim to use" do
+      FileUtils.mkdir_p 'example/plugin'
+      File.open('example/plugin/test.vim', 'w') do |f|
+        f.write 'command Okay echo "OK"'
+      end
+
+      vim.add_plugin('example', 'plugin/test.vim')
+
+      vim.command('Okay').should eq 'OK'
+    end
+
     describe "#search" do
       it "positions the cursor on the search term" do
         vim.edit 'some_file'
