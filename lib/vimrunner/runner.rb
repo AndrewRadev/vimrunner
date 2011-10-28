@@ -97,8 +97,13 @@ module Vimrunner
     end
 
     # Edits the file +filename+ with Vim.
+    #
+    # Note that this doesn't use the '--remote' vim flag, it simply types in
+    # the command manually. This is necessary to avoid the vim instance getting
+    # focus.
     def edit(filename)
-      invoke_vim '--remote', filename
+      normal
+      type ":e #{filename}<cr>"
     end
 
     # Writes the file being edited to disk. Note that you need to set the
