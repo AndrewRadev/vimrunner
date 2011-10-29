@@ -108,7 +108,7 @@ module Vimrunner
     # Writes the file being edited to disk. Note that you need to set the
     # file's name first by using Runner#edit.
     def write
-      normal ':w<cr>'
+      command :write
     end
 
     # Switches vim to insert mode and types in the given text.
@@ -128,21 +128,6 @@ module Vimrunner
     # Kills the vim instance in the background by sending it a TERM signal.
     def kill
       Shell.kill(@pid)
-    end
-
-    # Ensures that vim has finished with its previous action. This is useful
-    # when a command has been sent to the vim instance that might take a little
-    # while, and we need to check the results of the command.
-    #
-    # Example:
-    #
-    #   runner.write
-    #   runner.wait_until_ready
-    #   # Provided there was no error, the file should now be written
-    #   # successfully
-    #
-    def wait_until_ready
-      command :echo
     end
 
     private
