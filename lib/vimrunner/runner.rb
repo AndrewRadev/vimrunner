@@ -68,16 +68,21 @@ module Vimrunner
       command("runtime #{entry_script}")
     end
 
+    # Invokes one of the basic actions the vim server supports, sending a key
+    # sequence. The keys are sent as-is, so it'd probably be better to use the
+    # wrapper methods, #normal, #insert and so on.
     def type(keys)
       invoke_vim '--remote-send', keys
     end
 
-    # Executes +vim_command+ in the vim instance and returns its output,
+    # Executes the given command in the vim instance and returns its output,
     # stripping all surrounding whitespace.
     def command(vim_command)
       normal
 
-      invoke_vim('--remote-expr', "VimrunnerEvaluateCommandOutput('#{vim_command.to_s}')").strip.tap do |output|
+      expression = "VimrunnerEvaluateCommandOutput('#{vim_command.to_s}')"
+
+      invoke_vim('--remote-expr', expression).strip.tap do |output|
         raise InvalidCommandError if output =~ /^Vim:E\d+:/
       end
     end
@@ -111,7 +116,7 @@ module Vimrunner
     # the command manually. This is necessary to avoid the vim instance getting
     # focus.
     def edit(filename)
-      normal ":e #{filename}<cr>"
+      command "edit #{filename}"
     end
 
     # Writes the file being edited to disk. Note that you need to set the
