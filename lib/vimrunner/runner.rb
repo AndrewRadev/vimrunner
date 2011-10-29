@@ -9,8 +9,12 @@ module Vimrunner
   #
   # Use Runner#kill to manually destroy the background process.
   class Runner
+    attr_reader :servername
+
     class << self
       def start_gvim
+        servername = "VIMRUNNER#{rand.to_s.gsub '.', ''}"
+
         child_stdin,   parent_stdin = IO::pipe
         parent_stdout, child_stdout = IO::pipe
         parent_stderr, child_stderr = IO::pipe
@@ -24,21 +28,26 @@ module Vimrunner
 
           [child_stdin, child_stdout, child_stderr].each { |io| io.close }
 
-          exec 'gvim', '-f', '-u', vimrc_path, '--noplugin', '--servername', 'VIMRUNNER'
+          exec 'gvim', '-f', '-u', vimrc_path, '--noplugin', '--servername', servername
         end
 
         [child_stdin, child_stdout, child_stderr].each { |io| io.close }
 
-        new(pid)
+        new(pid, servername)
       end
 
       def vimrc_path
         File.join(File.expand_path('../../..', __FILE__), 'vim', 'vimrc')
       end
+
+      def serverlist
+        %x[vim --serverlist].strip.split "\n"
+      end
     end
 
-    def initialize(pid)
-      @pid = pid
+    def initialize(pid, servername)
+      @pid        = pid
+      @servername = servername
       wait_until_started
     end
 
@@ -132,18 +141,16 @@ module Vimrunner
 
     private
 
-    def serverlist
-      %x[vim --serverlist].strip.split '\n'
-    end
-
     def invoke_vim(*args)
-      args = ['vim', '--servername', 'VIMRUNNER', *args]
+      args = ['vim', '--servername', @servername, *args]
       Shell.run *args
     end
 
     def wait_until_started
-      while serverlist.empty? or not serverlist.include? 'VIMRUNNER'
+      serverlist = Runner.serverlist
+      while serverlist.empty? or not serverlist.include? @servername
         sleep 0.1
+        serverlist = Runner.serverlist
       end
     end
   end

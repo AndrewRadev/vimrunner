@@ -10,9 +10,16 @@ module Vimrunner
       vim.kill
     end
 
-    it "spawns a vim server with the name VIMRUNNER" do
-      IO.popen 'vim --serverlist' do |io|
-        io.read.strip.should eq 'VIMRUNNER'
+    it "spawns a vim server" do
+      Runner.serverlist.should =~ [vim.servername]
+    end
+
+    it "can spawn more than one vim server" do
+      begin
+        other = Runner.start_gvim
+        Runner.serverlist.should =~ [vim.servername, other.servername]
+      ensure
+        other.kill
       end
     end
 
@@ -71,7 +78,7 @@ module Vimrunner
     end
 
     describe "#command" do
-      it "can return the output of a vim command" do
+      it "returns the output of a vim command" do
         vim.command(:version).should include '+clientserver'
         vim.command('echo "foo"').should eq 'foo'
       end
