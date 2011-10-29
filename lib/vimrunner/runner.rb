@@ -130,10 +130,6 @@ module Vimrunner
       type "<c-\\><c-n>#{keys}"
     end
 
-    def quit
-      normal 'ZZ'
-    end
-
     # Kills the vim instance in the background by sending it a TERM signal.
     def kill
       Shell.kill(@pid)
