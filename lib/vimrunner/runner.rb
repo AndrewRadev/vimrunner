@@ -13,25 +13,9 @@ module Vimrunner
 
     class << self
       def start_gvim
-        servername = "VIMRUNNER#{rand.to_s.gsub '.', ''}"
-
-        child_stdin,   parent_stdin = IO::pipe
-        parent_stdout, child_stdout = IO::pipe
-        parent_stderr, child_stderr = IO::pipe
-
-        pid = Kernel.fork do
-          [parent_stdin, parent_stdout, parent_stderr].each { |io| io.close }
-
-          STDIN.reopen(child_stdin)
-          STDOUT.reopen(child_stdout)
-          STDERR.reopen(child_stderr)
-
-          [child_stdin, child_stdout, child_stderr].each { |io| io.close }
-
-          exec 'gvim', '-f', '-u', vimrc_path, '--noplugin', '--servername', servername
-        end
-
-        [child_stdin, child_stdout, child_stderr].each { |io| io.close }
+        servername = "VIMRUNNER#{rand.to_s}"
+        command    = "gvim -f -u #{vimrc_path} --noplugin --servername #{servername}"
+        pid        = spawn(command, [:in, :out, :err] => :close)
 
         new(pid, servername)
       end
