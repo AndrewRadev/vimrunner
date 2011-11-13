@@ -12,18 +12,10 @@ module Vimrunner
       IO.popen(command) { |io| io.read.strip }
     end
 
-    # Sends a TERM signal to the given PID if it corresponds to a running
-    # process.
+    # Sends a TERM signal to the given PID. Returns true if the process was
+    # found and killed, false otherwise.
     def kill(pid)
-      Process.kill(Signal.list['TERM'], pid) if running?(pid)
-    end
-
-    private
-
-    # Checks if the given PID corresponds to a running process
-    def running?(pid)
-      return false if pid.nil?
-      Process.getpgid(pid)
+      Process.kill('TERM', pid)
       true
     rescue Errno::ESRCH
       false

@@ -11,10 +11,16 @@ module Vimrunner
     it "can kill a process by its PID" do
       pid = Process.fork { sleep 1; exit(42) }
 
-      Shell.kill pid
+      Shell.kill(pid).should be_true
 
-      Process.wait pid
+      Process.wait(pid)
       $?.exitstatus.should_not eq 42
+    end
+
+    it "can safely attempt to kill a non-existent process" do
+      pid = Process.fork { exit }
+      Process.wait(pid)
+      Shell.kill(pid).should be_false
     end
   end
 end
