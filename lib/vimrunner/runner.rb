@@ -1,3 +1,4 @@
+require 'pty'
 require 'vimrunner/shell'
 require 'vimrunner/errors'
 
@@ -16,6 +17,14 @@ module Vimrunner
         servername = "VIMRUNNER#{rand.to_s}"
         command    = "gvim -f -u #{vimrc_path} --noplugin --servername #{servername}"
         pid        = spawn(command, [:in, :out, :err] => :close)
+
+        new(pid, servername)
+      end
+
+      def start_vim
+        servername     = "VIMRUNNER#{rand.to_s}"
+        command        = "vim -f -u #{vimrc_path} --noplugin --servername #{servername}"
+        _out, _in, pid = PTY.spawn(command)
 
         new(pid, servername)
       end

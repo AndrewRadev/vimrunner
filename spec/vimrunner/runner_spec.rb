@@ -4,7 +4,7 @@ require 'vimrunner/errors'
 
 module Vimrunner
   describe Runner do
-    let!(:vim) { Runner.start_gvim }
+    let!(:vim) { Runner.start_vim }
 
     after :each do
       vim.kill
@@ -16,7 +16,7 @@ module Vimrunner
 
     it "can spawn more than one vim server" do
       begin
-        other = Runner.start_gvim
+        other = Runner.start_vim
         Runner.serverlist.should =~ [vim.servername, other.servername]
       ensure
         other.kill
