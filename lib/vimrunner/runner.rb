@@ -42,14 +42,15 @@ module Vimrunner
     # dir          - The base directory of the plugin, the one that contains
     #                its autoload, plugin, ftplugin, etc. directories.
     # entry_script - The vim script that's runtime'd to initialize the plugin.
+    #                Optional.
     #
     # Example:
     #
     #   vim.add_plugin 'rails', 'plugin/rails.vim'
     #
-    def add_plugin(dir, entry_script)
+    def add_plugin(dir, entry_script = nil)
       command("set runtimepath+=#{dir}")
-      command("runtime #{entry_script}")
+      command("runtime #{entry_script}") if entry_script
     end
 
     # Invokes one of the basic actions the vim server supports, sending a key
