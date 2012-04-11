@@ -1,4 +1,5 @@
 require 'pty'
+require 'rbconfig'
 require 'vimrunner/shell'
 require 'vimrunner/errors'
 
@@ -13,20 +14,26 @@ module Vimrunner
     attr_reader :servername
 
     class << self
-      def start_gvim
-        servername = "VIMRUNNER#{rand.to_s}"
-        command    = "gvim -f -u #{vimrc_path} --noplugin --servername #{servername}"
-        pid        = spawn(command, [:in, :out, :err] => :close)
+      attr_writer :vim_path
+
+      def start_vim
+        servername     = "VIMRUNNER#{rand.to_s}"
+        command        = "#{vim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
+        _out, _in, pid = PTY.spawn(command)
 
         new(pid, servername)
       end
 
-      def start_vim
-        servername     = "VIMRUNNER#{rand.to_s}"
-        command        = "vim -f -u #{vimrc_path} --noplugin --servername #{servername}"
-        _out, _in, pid = PTY.spawn(command)
+      def default_vim(host_os)
+        if host_os =~ /darwin/
+          'mvim'
+        else
+          'vim'
+        end
+      end
 
-        new(pid, servername)
+      def vim_path
+        @vim_path ||= default_vim(RbConfig::CONFIG['host_os'])
       end
 
       def vimrc_path
@@ -34,7 +41,7 @@ module Vimrunner
       end
 
       def serverlist
-        %x[vim --serverlist].strip.split "\n"
+        %x[#{vim_path} --serverlist].strip.split "\n"
       end
     end
 
@@ -137,7 +144,7 @@ module Vimrunner
     private
 
     def invoke_vim(*args)
-      args = ['vim', '--servername', @servername, *args]
+      args = [self.class.vim_path, '--servername', @servername, *args]
       Shell.run *args
     end
 

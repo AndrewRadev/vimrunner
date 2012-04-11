@@ -11,13 +11,13 @@ module Vimrunner
     end
 
     it "spawns a vim server" do
-      Runner.serverlist.should =~ [vim.servername]
+      Runner.serverlist.should include(vim.servername)
     end
 
     it "can spawn more than one vim server" do
       begin
         other = Runner.start_vim
-        Runner.serverlist.should =~ [vim.servername, other.servername]
+        Runner.serverlist.should include(vim.servername, other.servername)
       ensure
         other.kill
       end
@@ -46,6 +46,34 @@ module Vimrunner
       vim.add_plugin('example', 'plugin/test.vim')
 
       vim.command('Okay').should eq 'OK'
+    end
+
+    describe "#vim_path" do
+      after do
+        Runner.vim_path = nil
+      end
+
+      it "defaults to a sensible value" do
+        Runner.stub(:default_vim => 'mvim')
+
+        Runner.vim_path.should eq 'mvim'
+      end
+
+      it "can be explicitly overridden" do
+        Runner.vim_path = '/opt/local/bin/gvim'
+
+        Runner.vim_path.should eq '/opt/local/bin/gvim'
+      end
+    end
+
+    describe "#default_vim" do
+      it "uses mvim if on Mac OS X" do
+        Runner.default_vim('darwin11.3.0').should eq 'mvim'
+      end
+
+      it "uses vim if not on Mac OS X" do
+        Runner.default_vim('linux-gnu').should eq 'vim'
+      end
     end
 
     describe "#set" do

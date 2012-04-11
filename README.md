@@ -3,7 +3,7 @@ Vim instance and control it programatically. Apart from being a fun party
 trick, this could be used to do integration testing on vimscript.
 
 The `vimrunner` executable opens up an irb session with `$vim` set to a running
-`gvim` instance. A few things you can try:
+`vim` instance. A few things you can try:
 
 ``` ruby
 $vim.edit 'some_file_name'  # edit a file
@@ -16,8 +16,14 @@ $vim.write                  # write file to disk
 For more examples of what you can do, you could take a look at the specs, they
 should be fairly readable.
 
-Note that this should work on a Linux box, but probably won't on a Mac. I'm
-assuming you'd need to change the binary to `mvim` at the very least.
+This should work on a Linux box and a Mac with MacVim and the `mvim` binary
+installed (the runner will attempt to select the appropriate `vim` binary for
+your platform). If you have a non-standard install, you can specify an explicit
+`vim_path` like so:
+
+```ruby
+Vimrunner::Runner.vim_path = "/opt/local/bin/gvim"
+```
 
 This is still fairly experimental, so use with caution. Any issue reports or
 contributions are very welcome on the
