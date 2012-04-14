@@ -14,7 +14,16 @@ module Vimrunner
     attr_reader :servername
 
     class << self
+      attr_writer :gvim_path
       attr_writer :vim_path
+
+      def start_gvim
+        servername = "VIMRUNNER#{rand.to_s}"
+        command    = "#{gvim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
+        pid        = spawn(command, [:in, :out, :err] => :close)
+
+        new(pid, servername)
+      end
 
       def start_vim
         servername     = "VIMRUNNER#{rand.to_s}"
@@ -24,16 +33,20 @@ module Vimrunner
         new(pid, servername)
       end
 
-      def default_vim(host_os)
+      def default_gvim(host_os)
         if host_os =~ /darwin/
           'mvim'
         else
-          'vim'
+          'gvim'
         end
       end
 
       def vim_path
-        @vim_path ||= default_vim(RbConfig::CONFIG['host_os'])
+        @vim_path ||= 'vim'
+      end
+
+      def gvim_path
+        @gvim_path ||= default_gvim(RbConfig::CONFIG['host_os'])
       end
 
       def vimrc_path
