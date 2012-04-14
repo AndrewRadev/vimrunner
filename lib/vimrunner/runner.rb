@@ -5,8 +5,7 @@ require 'vimrunner/errors'
 
 module Vimrunner
 
-  # The Runner class acts as the actual proxy to a vim instance. Upon
-  # initialization, a vim process is started in the background. The Runner
+  # The Runner class acts as the actual proxy to a vim instance. The Runner
   # instance's public methods correspond to actions the instance will perform.
   #
   # Use Runner#kill to manually destroy the background process.
@@ -17,6 +16,7 @@ module Vimrunner
       attr_writer :gvim_path
       attr_writer :vim_path
 
+      # Starts a GUI vim, useful for interactive experimentation.
       def start_gvim
         servername = "VIMRUNNER#{rand.to_s}"
         command    = "#{gvim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
@@ -25,6 +25,7 @@ module Vimrunner
         new(pid, servername)
       end
 
+      # Starts a terminal vim, useful for tests and scripting.
       def start_vim
         servername     = "VIMRUNNER#{rand.to_s}"
         command        = "#{vim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
