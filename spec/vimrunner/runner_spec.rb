@@ -71,27 +71,24 @@ module Vimrunner
         Runner.gvim_path = nil
       end
 
-      it "defaults to a sensible value" do
+      it "defaults to 'mvim' on Mac OS X" do
         Runner.gvim_path = nil
-        Runner.stub(:default_gvim => 'mvim')
+        Runner.stub(:host_os => 'darwin11.3.0')
 
         Runner.gvim_path.should eq 'mvim'
+      end
+
+      it "defaults to 'gvim' on Linux" do
+        Runner.gvim_path = nil
+        Runner.stub(:host_os => 'linux-gnu')
+
+        Runner.gvim_path.should eq 'gvim'
       end
 
       it "can be explicitly overridden" do
         Runner.gvim_path = '/opt/local/bin/gvim'
 
         Runner.gvim_path.should eq '/opt/local/bin/gvim'
-      end
-    end
-
-    describe "#default_gvim" do
-      it "uses mvim if on Mac OS X" do
-        Runner.default_gvim('darwin11.3.0').should eq 'mvim'
-      end
-
-      it "uses gvim if not on Mac OS X" do
-        Runner.default_gvim('linux-gnu').should eq 'gvim'
       end
     end
 

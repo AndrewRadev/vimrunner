@@ -33,20 +33,12 @@ module Vimrunner
         new(pid, servername)
       end
 
-      def default_gvim(host_os)
-        if host_os =~ /darwin/
-          'mvim'
-        else
-          'gvim'
-        end
-      end
-
       def vim_path
         @vim_path ||= 'vim'
       end
 
       def gvim_path
-        @gvim_path ||= default_gvim(RbConfig::CONFIG['host_os'])
+        @gvim_path ||= default_gvim
       end
 
       def vimrc_path
@@ -55,6 +47,20 @@ module Vimrunner
 
       def serverlist
         %x[#{vim_path} --serverlist].strip.split "\n"
+      end
+
+      private
+
+      def default_gvim
+        if host_os =~ /darwin/
+          'mvim'
+        else
+          'gvim'
+        end
+      end
+
+      def host_os
+        RbConfig::CONFIG['host_os']
       end
     end
 
