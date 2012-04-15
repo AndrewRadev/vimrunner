@@ -1,5 +1,6 @@
 require 'pty'
 require 'rbconfig'
+require 'timeout'
 require 'vimrunner/shell'
 require 'vimrunner/errors'
 
@@ -18,6 +19,8 @@ module Vimrunner
 
       # Starts a GUI vim, useful for interactive experimentation.
       def start_gvim
+        check_serverlist
+
         servername = "VIMRUNNER#{rand.to_s}"
         command    = "#{gvim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
         pid        = spawn(command, [:in, :out, :err] => :close)
@@ -27,6 +30,8 @@ module Vimrunner
 
       # Starts a terminal vim, useful for tests and scripting.
       def start_vim
+        check_serverlist
+
         servername     = "VIMRUNNER#{rand.to_s}"
         command        = "#{vim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
         _out, _in, pid = PTY.spawn(command)
@@ -51,6 +56,11 @@ module Vimrunner
       end
 
       private
+
+      def check_serverlist
+        vim_version = %x[#{vim_path} --version]
+        raise NoClientServerError if vim_version =~ /-clientserver/
+      end
 
       def default_gvim
         if host_os =~ /darwin/
@@ -165,7 +175,10 @@ module Vimrunner
 
     def invoke_vim(*args)
       args = [self.class.vim_path, '--servername', @servername, *args]
-      Shell.run *args
+
+      Timeout.timeout(5, TimeoutError) do
+        Shell.run *args
+      end
     end
 
     def wait_until_started
