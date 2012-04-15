@@ -150,8 +150,8 @@ module Vimrunner
       command "edit #{filename}"
     end
 
-    # Writes the file being edited to disk. Note that you need to set the
-    # file's name first by using Runner#edit.
+    # Writes the file being edited to disk. Note that you probably want to set
+    # the file's name first by using Runner#edit.
     def write
       command :write
     end
