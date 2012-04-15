@@ -175,17 +175,16 @@ module Vimrunner
 
     def invoke_vim(*args)
       args = [self.class.vim_path, '--servername', @servername, *args]
-
-      Timeout.timeout(5, TimeoutError) do
-        Shell.run *args
-      end
+      Shell.run *args
     end
 
     def wait_until_started
-      serverlist = Runner.serverlist
-      while serverlist.empty? or not serverlist.include? @servername
-        sleep 0.1
+      Timeout.timeout(5, TimeoutError) do
         serverlist = Runner.serverlist
+        while serverlist.empty? or not serverlist.include? @servername
+          sleep 0.1
+          serverlist = Runner.serverlist
+        end
       end
     end
   end
