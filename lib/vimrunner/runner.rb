@@ -161,7 +161,7 @@ module Vimrunner
       normal "i#{text}"
     end
 
-    # Switches vim to insert mode and types in the given keys.
+    # Switches vim to normal mode and types in the given keys.
     def normal(keys = '')
       type "<c-\\><c-n>#{keys}"
     end
