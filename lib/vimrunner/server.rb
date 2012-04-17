@@ -26,8 +26,6 @@ module Vimrunner
       # the "vim" executable is not compiled with clientserver capabilities,
       # the GUI version is started instead.
       def vim_path
-        raise UnsupportedOSError.new(host_os) unless mac? or linux?
-
         if clientserver_enabled? 'vim'
           'vim'
         else
@@ -38,8 +36,6 @@ module Vimrunner
       # The default path to use when starting a server with the GUI version of
       # vim. Defaults to "mvim" on a mac and "gvim" on linux.
       def gui_vim_path
-        raise UnsupportedOSError.new(host_os) unless mac? or linux?
-
         if mac?
           'mvim'
         else
@@ -53,10 +49,6 @@ module Vimrunner
 
       def mac?
         host_os =~ /darwin/
-      end
-
-      def linux?
-        host_os =~ /linux/
       end
 
       def clientserver_enabled?(vim_path)
