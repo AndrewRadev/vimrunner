@@ -61,7 +61,7 @@ module Vimrunner
 
       def clientserver_enabled?(vim_path)
         vim_version = %x[#{vim_path} --version]
-        vim_version =~ /\+clientserver/ and vim_version =~ /\+xterm_clipboard/
+        vim_version.include? '+clientserver' and vim_version.include? '+xterm_clipboard'
       end
 
       private
