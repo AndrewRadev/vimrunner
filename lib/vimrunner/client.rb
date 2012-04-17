@@ -2,11 +2,8 @@ require 'vimrunner/shell'
 
 module Vimrunner
   class Client
-    attr_reader :vim_path, :servername
-
     def initialize(server)
-      @vim_path   = server.vim_path
-      @servername = server.name
+      @server = server
     end
 
     # Adds a plugin to Vim's runtime. Initially, Vim is started without
@@ -94,10 +91,14 @@ module Vimrunner
       type "<c-\\><c-n>#{keys}"
     end
 
+    def kill
+      @server.kill
+    end
+
     private
 
     def invoke_vim(*args)
-      args = [vim_path, '--servername', servername, *args]
+      args = [@server.vim_path, '--servername', @server.name, *args]
       Shell.run *args
     end
   end
