@@ -42,30 +42,39 @@ module Vimrunner
         }.to raise_error
       end
 
-      describe "(without GUI)" do
-        let(:server) { Server.new(:gui => false) }
-
-        it "defaults to 'mvim' on Mac OS X" do
-          Server.stub(:mac? => true)
-          server.vim_path.should eq 'mvim'
-        end
-
-        it "defaults to 'vim' on Linux" do
-          Server.stub(:linux? => true)
-          server.vim_path.should eq 'vim'
-        end
-      end
-
       describe "(with GUI)" do
         let(:server) { Server.new(:gui => true) }
 
         it "defaults to 'mvim' on Mac OS X" do
-          Server.stub(:mac? => true)
+          Server.stub(:linux? => false, :mac? => true)
           server.vim_path.should eq 'mvim'
         end
 
         it "defaults to 'gvim' on Linux" do
-          Server.stub(:linux? => true)
+          Server.stub(:linux? => true, :mac? => false)
+          server.vim_path.should eq 'gvim'
+        end
+      end
+
+      describe "(without GUI)" do
+        let(:server) { Server.new(:gui => false) }
+
+        it "defaults to 'vim' on Mac OS X" do
+          Server.stub(:linux? => false, :mac? => true)
+          server.vim_path.should eq 'vim'
+        end
+
+        it "defaults to 'vim' on Linux" do
+          Server.stub(:linux? => true, :mac? => false)
+          server.vim_path.should eq 'vim'
+        end
+      end
+
+      describe "(without GUI, but without +clientserver)" do
+        let(:server) { Server.new(:gui => false) }
+
+        it "falls back to GUI vim" do
+          Server.stub(:clientserver_enabled? => false, :mac? => false, :linux? => true)
           server.vim_path.should eq 'gvim'
         end
       end

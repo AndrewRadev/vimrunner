@@ -22,17 +22,28 @@ module Vimrunner
         %x[#{vim_path} --serverlist].strip.split "\n"
       end
 
+      # The default path to use when starting a server with a terminal vim. If
+      # the "vim" executable is not compiled with clientserver capabilities,
+      # the GUI version is started instead.
       def vim_path
-        if mac? then 'mvim'
-        elsif linux? then 'vim'
-        else raise UnsupportedOSError.new(host_os)
+        raise UnsupportedOSError.new(host_os) unless mac? or linux?
+
+        if clientserver_enabled? 'vim'
+          'vim'
+        else
+          gui_vim_path
         end
       end
 
+      # The default path to use when starting a server with the GUI version of
+      # vim. Defaults to "mvim" on a mac and "gvim" on linux.
       def gui_vim_path
-        if mac? then 'mvim'
-        elsif linux? then 'gvim'
-        else raise UnsupportedOSError.new(host_os)
+        raise UnsupportedOSError.new(host_os) unless mac? or linux?
+
+        if mac?
+          'mvim'
+        else
+          'gvim'
         end
       end
 
@@ -46,6 +57,11 @@ module Vimrunner
 
       def linux?
         host_os =~ /linux/
+      end
+
+      def clientserver_enabled?(vim_path)
+        vim_version = %x[#{vim_path} --version]
+        vim_version =~ /\+clientserver/ and vim_version =~ /\+xterm_clipboard/
       end
 
       private
@@ -64,8 +80,6 @@ module Vimrunner
     end
 
     def start
-      check_requirements
-
       command = "#{vim_path} -f -u #{Server.vimrc_path} --noplugin --servername #{name}"
 
       if gui?
@@ -96,14 +110,6 @@ module Vimrunner
     end
 
     private
-
-    def check_requirements
-      vim_version = %x[#{vim_path} --version]
-
-      if vim_version =~ /-clientserver/ or vim_version =~ /-xterm_clipboard/
-        raise NoClientServerError
-      end
-    end
 
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do
