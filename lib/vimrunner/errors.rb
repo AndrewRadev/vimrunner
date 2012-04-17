@@ -3,7 +3,7 @@ module Vimrunner
 
   class NoClientServerError < RuntimeError
     def message
-      "Vim needs to be compiled with +clientserver"
+      "Vim needs to be compiled with +clientserver and +xterm_clipboard"
     end
   end
 
