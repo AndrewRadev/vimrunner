@@ -1,84 +1,12 @@
-require 'pty'
-require 'rbconfig'
-require 'timeout'
 require 'vimrunner/shell'
-require 'vimrunner/errors'
 
 module Vimrunner
+  class Client
+    attr_reader :vim_path, :servername
 
-  # The Runner class acts as the actual proxy to a vim instance. The Runner
-  # instance's public methods correspond to actions the instance will perform.
-  #
-  # Use Runner#kill to manually destroy the background process.
-  class Runner
-    attr_reader :servername
-
-    class << self
-      attr_writer :gvim_path
-      attr_writer :vim_path
-
-      # Starts a GUI vim, useful for interactive experimentation.
-      def start_gvim
-        check_serverlist
-
-        servername = "VIMRUNNER#{rand.to_s}"
-        command    = "#{gvim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
-        pid        = spawn(command, [:in, :out, :err] => :close)
-
-        new(pid, servername)
-      end
-
-      # Starts a terminal vim, useful for tests and scripting.
-      def start_vim
-        check_serverlist
-
-        servername     = "VIMRUNNER#{rand.to_s}"
-        command        = "#{vim_path} -f -u #{vimrc_path} --noplugin --servername #{servername}"
-        _out, _in, pid = PTY.spawn(command)
-
-        new(pid, servername)
-      end
-
-      def vim_path
-        @vim_path ||= 'vim'
-      end
-
-      def gvim_path
-        @gvim_path ||= default_gvim
-      end
-
-      def vimrc_path
-        File.join(File.expand_path('../../..', __FILE__), 'vim', 'vimrc')
-      end
-
-      def serverlist
-        %x[#{vim_path} --serverlist].strip.split "\n"
-      end
-
-      private
-
-      def check_serverlist
-        vim_version = %x[#{vim_path} --version]
-        raise NoClientServerError if vim_version =~ /-clientserver/
-      end
-
-      def default_gvim
-        if host_os =~ /darwin/
-          'mvim'
-        else
-          'gvim'
-        end
-      end
-
-      def host_os
-        RbConfig::CONFIG['host_os']
-      end
-    end
-
-    def initialize(pid, servername)
-      @pid        = pid
-      @servername = servername
-      wait_until_started
+    def initialize(server)
+      @vim_path   = server.vim_path
+      @servername = server.name
     end
 
     # Adds a plugin to Vim's runtime. Initially, Vim is started without
@@ -166,26 +94,11 @@ module Vimrunner
       type "<c-\\><c-n>#{keys}"
     end
 
-    # Kills the vim instance in the background by sending it a TERM signal.
-    def kill
-      Shell.kill(@pid)
-    end
-
     private
 
     def invoke_vim(*args)
-      args = [self.class.vim_path, '--servername', @servername, *args]
+      args = [vim_path, '--servername', servername, *args]
       Shell.run *args
-    end
-
-    def wait_until_started
-      Timeout.timeout(5, TimeoutError) do
-        serverlist = Runner.serverlist
-        while serverlist.empty? or not serverlist.include? @servername
-          sleep 0.1
-          serverlist = Runner.serverlist
-        end
-      end
     end
   end
 end
