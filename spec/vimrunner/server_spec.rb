@@ -30,6 +30,10 @@ module Vimrunner
     end
 
     describe "#vim_path" do
+      before :each do
+        Server.stub(:clientserver_enabled? => true)
+      end
+
       it "can be explicitly overridden" do
         server = Server.new(:vim_path => '/opt/local/bin/vim')
         server.vim_path.should eq '/opt/local/bin/vim'
