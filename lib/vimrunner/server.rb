@@ -64,11 +64,12 @@ module Vimrunner
     end
 
     attr_accessor :pid
+    attr_reader :name, :vim_path
 
     def initialize(options = {})
-      @vim_path = options[:vim_path]
-      @gui      = options[:gui]
-      @name     = options[:name].upcase if options[:name]
+      @gui      = options.fetch(:gui)      { false }
+      @vim_path = options.fetch(:vim_path) { gui? ? Server.gui_vim_path : Server.vim_path }
+      @name     = options.fetch(:name)     { "VIMRUNNER#{rand.to_s}" }.upcase
     end
 
     def start
@@ -82,14 +83,6 @@ module Vimrunner
 
       wait_until_started
       self
-    end
-
-    def vim_path
-      @vim_path ||= (gui? ? Server.gui_vim_path : Server.vim_path)
-    end
-
-    def name
-      @name ||= "VIMRUNNER#{rand.to_s}"
     end
 
     def gui?
