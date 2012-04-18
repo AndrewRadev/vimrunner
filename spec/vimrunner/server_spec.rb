@@ -23,12 +23,6 @@ module Vimrunner
       end
     end
 
-    it "can be given a specific name" do
-      server = Server.start(:name => 'example')
-      Server.list.should include('EXAMPLE')
-      server.kill
-    end
-
     describe "#vim_path" do
       before :each do
         Server.stub(:clientserver_enabled? => true)

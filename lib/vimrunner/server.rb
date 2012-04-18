@@ -67,9 +67,10 @@ module Vimrunner
     attr_reader :name, :vim_path
 
     def initialize(options = {})
-      @gui      = options.fetch(:gui)      { false }
+      @gui      = options.fetch(:gui) { false }
       @vim_path = options.fetch(:vim_path) { gui? ? Server.gui_vim_path : Server.vim_path }
-      @name     = options.fetch(:name)     { "VIMRUNNER#{rand.to_s}" }.upcase
+
+      @name = "VIMRUNNER#{rand.to_s}"
     end
 
     def start
