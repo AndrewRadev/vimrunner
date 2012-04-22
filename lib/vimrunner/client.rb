@@ -39,7 +39,8 @@ module Vimrunner
     def command(vim_command)
       normal
 
-      expression = "VimrunnerEvaluateCommandOutput('#{vim_command.to_s}')"
+      escaped_command = vim_command.to_s.gsub("'", "''")
+      expression = "VimrunnerEvaluateCommandOutput('#{escaped_command}')"
 
       invoke_vim('--remote-expr', expression).strip.tap do |output|
         raise InvalidCommandError if output =~ /^Vim:E\d+:/
