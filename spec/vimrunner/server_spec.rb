@@ -5,9 +5,7 @@ module Vimrunner
   describe Server do
     it "can start a vim server process" do
       server = Server.start
-
-      Server.list.should include(server.name)
-
+      server.serverlist.should include(server.name)
       server.kill
     end
 
@@ -16,7 +14,7 @@ module Vimrunner
         first  = Server.start
         second = Server.start
 
-        Server.list.should include(first.name, second.name)
+        first.serverlist.should include(first.name, second.name)
       ensure
         first.kill
         second.kill
@@ -59,6 +57,10 @@ module Vimrunner
           Server.stub(:mac? => false)
           server.vim_path.should eq 'vim'
         end
+
+        it "is not registered as a GUI" do
+          server.should_not be_gui
+        end
       end
 
       describe "(without GUI, but without +clientserver)" do
@@ -67,6 +69,11 @@ module Vimrunner
         it "falls back to GUI vim" do
           Server.stub(:clientserver_enabled? => false, :mac? => false)
           server.vim_path.should eq 'gvim'
+        end
+
+        it "is registered as a GUI" do
+          Server.stub(:clientserver_enabled? => false, :mac? => false)
+          server.should be_gui
         end
       end
     end

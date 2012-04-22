@@ -27,11 +27,6 @@ module Vimrunner
         Client.new(self)
       end
 
-      # Retrieve a list of names of currently running Vim servers.
-      def list
-        %x[#{vim_path} --serverlist].strip.split "\n"
-      end
-
       # The default path to use when starting a server with a terminal Vim. If
       # the "vim" executable is not compiled with clientserver capabilities,
       # the GUI version is started instead.
@@ -136,14 +131,19 @@ module Vimrunner
       Shell.kill(@pid)
     end
 
+    # Retrieve a list of names of currently running Vim servers.
+    def serverlist
+      %x[#{vim_path} --serverlist].strip.split "\n"
+    end
+
     private
 
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do
-        serverlist = Server.list
-        while serverlist.empty? or not serverlist.include? name
+        servers = serverlist
+        while servers.empty? or not servers.include? name
           sleep 0.1
-          serverlist = Server.list
+          servers = serverlist
         end
       end
     end
