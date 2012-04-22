@@ -65,6 +65,17 @@ module Vimrunner
       end
     end
 
+    describe "#echo" do
+      it "returns the result of a given expression" do
+        client.echo('"foo"').should eq 'foo'
+      end
+
+      it "returns the result of multiple expressions" do
+        client.command('let b:foo = "bar"')
+        client.echo('"foo"', 'b:foo').should eq 'foo bar'
+      end
+    end
+
     describe "#command" do
       it "returns the output of a vim command" do
         client.command(:version).should include '+clientserver'
