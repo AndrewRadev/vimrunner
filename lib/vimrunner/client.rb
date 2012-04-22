@@ -1,6 +1,9 @@
 require 'vimrunner/shell'
 
 module Vimrunner
+
+  # A Client is simply a proxy to a Vim server. It's initialized with a Server
+  # instance and sends commands, keys and signals to it.
   class Client
     def initialize(server)
       @server = server
@@ -12,7 +15,7 @@ module Vimrunner
     #
     # dir          - The base directory of the plugin, the one that contains
     #                its autoload, plugin, ftplugin, etc. directories.
-    # entry_script - The vim script that's runtime'd to initialize the plugin.
+    # entry_script - The Vim script that's runtime'd to initialize the plugin.
     #                Optional.
     #
     # Example:
@@ -24,14 +27,14 @@ module Vimrunner
       command("runtime #{entry_script}") if entry_script
     end
 
-    # Invokes one of the basic actions the vim server supports, sending a key
+    # Invokes one of the basic actions the Vim server supports, sending a key
     # sequence. The keys are sent as-is, so it'd probably be better to use the
     # wrapper methods, #normal, #insert and so on.
     def type(keys)
       invoke_vim '--remote-send', keys
     end
 
-    # Executes the given command in the vim instance and returns its output,
+    # Executes the given command in the Vim instance and returns its output,
     # stripping all surrounding whitespace.
     def command(vim_command)
       normal
@@ -43,14 +46,14 @@ module Vimrunner
       end
     end
 
-    # Starts a search in vim for the given text. The result is that the cursor
+    # Starts a search in Vim for the given text. The result is that the cursor
     # is positioned on its first occurrence.
     def search(text)
       normal
       type "/#{text}<cr>"
     end
 
-    # Sets a setting in vim. If +value+ is nil, the setting is considered to be
+    # Sets a setting in Vim. If +value+ is nil, the setting is considered to be
     # a boolean.
     #
     # Examples:
@@ -68,8 +71,8 @@ module Vimrunner
 
     # Edits the file +filename+ with Vim.
     #
-    # Note that this doesn't use the '--remote' vim flag, it simply types in
-    # the command manually. This is necessary to avoid the vim instance getting
+    # Note that this doesn't use the '--remote' Vim flag, it simply types in
+    # the command manually. This is necessary to avoid the Vim instance getting
     # focus.
     def edit(filename)
       command "edit #{filename}"
@@ -81,16 +84,17 @@ module Vimrunner
       command :write
     end
 
-    # Switches vim to insert mode and types in the given text.
+    # Switches Vim to insert mode and types in the given text.
     def insert(text = '')
       normal "i#{text}"
     end
 
-    # Switches vim to normal mode and types in the given keys.
+    # Switches Vim to normal mode and types in the given keys.
     def normal(keys = '')
       type "<c-\\><c-n>#{keys}"
     end
 
+    # Kills the server it's connected to.
     def kill
       @server.kill
     end

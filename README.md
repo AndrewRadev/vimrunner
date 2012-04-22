@@ -8,16 +8,40 @@ contributions are very welcome on the
 
 ## Usage
 
-There are two main entry points:
+There are two objects that can be used to control Vim, a "server" and a
+"client". The server takes care of spawning a server vim instance that will be
+controlled, and the client is its interface.
 
-  - `Vimrunner::Runner.start_vim`: Starts a terminal instance. Since it's
-    invisible, it's nice for use in automated tests.
-  - `Vimrunner::Runner.start_gvim`: Starts a GUI instance of Vim. On Linux,
-    it'll be a `gvim`, on Mac it defaults to `mvim`.
+A server can be started in two ways:
 
-Both methods return a `Runner` instance that you can use to command Vim. For a
-full list of methods you can call on it, check the instance methods on the
-`Runner` class in [the docs](http://rubydoc.info/gems/vimrunner/Vimrunner/Runner).
+  - `Vimrunner::Server.start`: Starts a terminal instance. Since it's
+    "invisible", it's nice for use in automated tests. If it's impossible to
+    start a terminal instance due to missing requirements for the `vim` binary
+    (see "Requirements" below), a GUI instance will be started.
+  - `Vimrunner::Server.start(:gui => true)`: Starts a GUI instance of Vim. On
+    Linux, it'll be a `gvim`, on Mac it defaults to `mvim`.
+
+Both methods return a `Server` instance. For a more comprehensive list of
+options you can start the server with, check out
+[the docs](http://rubydoc.info/gems/vimrunner/Vimrunner/Server).
+
+To be able to send commands to the server, you need a client that knows some
+details about it:
+
+``` ruby
+server = Vimrunner::Server.start
+
+client = Vimrunner::Client.new(server)
+# or,
+client = server.new_client
+```
+
+There are also two convenience methods that start a server and return a
+connected client -- `Vimrunner.start_vim` and `Vimrunner.start_gui_vim`.
+
+For a full list of methods you can invoke on the remote vim instance, check out
+the methods on the `Client` class in
+[the docs](http://rubydoc.info/gems/vimrunner/Vimrunner/Client).
 
 ## Requirements
 
@@ -27,21 +51,11 @@ the `normal`, `big` and `huge` featuresets. The client/server functionality
 This means that if you're using it for automated tests on a remote server,
 you'll probably need to start it with xvfb.
 
-## Settings
-
-If you have a non-standard install, you can specify explicit paths to the Vim
-executables like so:
-
-```ruby
-Vimrunner::Runner.vim_path  = "/opt/local/bin/vim"
-Vimrunner::Runner.gvim_path = "/opt/local/bin/gvim"
-```
-
 ## Experimenting
 
 The `vimrunner` executable opens up an irb session with `$vim` set to a running
-`gvim` instance. You can use this for interactive experimentation. A few things
-you can try:
+`gvim` (or `mvim`) client. You can use this for interactive experimentation. A
+few things you can try:
 
 ``` ruby
 $vim.edit 'some_file_name'  # edit a file
