@@ -84,6 +84,11 @@ module Vimrunner
       command :write
     end
 
+    # Echo each expression with a space in between.
+    def echo(*expressions)
+      command "echo #{expressions.join(' ')}"
+    end
+
     # Switches Vim to insert mode and types in the given text.
     def insert(text = '')
       normal "i#{text}"
