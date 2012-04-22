@@ -94,16 +94,18 @@ module Vimrunner
     #   server = Server.new(:vim_path => '/opt/bin/vim') # Will start a server with the given vim instance
     #
     def initialize(options = {})
-      @gui = options.fetch(:gui) { false }
-      @vim_path = options.fetch(:vim_path) do
-        if @gui or not Server.clientserver_enabled? Server.vim_path
-          @gui = true
-          Server.gui_vim_path
-        else
-          Server.vim_path
-        end
+      @gui      = options[:gui]
+      @vim_path = options[:vim_path]
+      @name     = "VIMRUNNER#{rand.to_s}"
+
+      if not @vim_path or not Server.clientserver_enabled? @vim_path
+        @vim_path = Server.vim_path
       end
-      @name = "VIMRUNNER#{rand.to_s}"
+
+      if @gui or not Server.clientserver_enabled? @vim_path
+        @gui      = true
+        @vim_path = Server.gui_vim_path
+      end
     end
 
     # Starts a Vim server.
