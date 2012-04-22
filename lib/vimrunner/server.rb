@@ -36,11 +36,7 @@ module Vimrunner
       # the "vim" executable is not compiled with clientserver capabilities,
       # the GUI version is started instead.
       def vim_path
-        if clientserver_enabled? 'vim'
-          'vim'
-        else
-          gui_vim_path
-        end
+        'vim'
       end
 
       # The default path to use when starting a server with the GUI version of
@@ -103,9 +99,15 @@ module Vimrunner
     #   server = Server.new(:vim_path => '/opt/bin/vim') # Will start a server with the given vim instance
     #
     def initialize(options = {})
-      @gui      = options.fetch(:gui) { false }
-      @vim_path = options.fetch(:vim_path) { gui? ? Server.gui_vim_path : Server.vim_path }
-
+      @gui = options.fetch(:gui) { false }
+      @vim_path = options.fetch(:vim_path) do
+        if @gui or not Server.clientserver_enabled? Server.vim_path
+          @gui = true
+          Server.gui_vim_path
+        else
+          Server.vim_path
+        end
+      end
       @name = "VIMRUNNER#{rand.to_s}"
     end
 
@@ -123,10 +125,8 @@ module Vimrunner
       self
     end
 
-    # Returns true if the server was initialized with :gui => true. Note that
-    # this may not be consistent with the binary that was actually started. If
-    # a terminal Vim instance was attempted, but an appropriate one was not
-    # available, it may still have a GUI.
+    # Returns true if the server is a GUI version of Vim. This can be forced by
+    # instantiating the server with :gui => true
     def gui?
       @gui
     end
