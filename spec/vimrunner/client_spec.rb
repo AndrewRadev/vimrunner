@@ -71,6 +71,10 @@ module Vimrunner
         client.command('echo "foo"').should eq 'foo'
       end
 
+      it "allows single quotes in the command" do
+        client.command("echo 'foo'").should eq 'foo'
+      end
+
       it "raises an error for a non-existent vim command" do
         expect do
           client.command(:nonexistent)
