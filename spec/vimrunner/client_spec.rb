@@ -16,7 +16,7 @@ module Vimrunner
       client.command(:pwd).should eq cwd
     end
 
-    it "can write a file through vim" do
+    it "can write a file through Vim" do
       client.edit 'some_file'
       client.insert 'Contents of the file'
       client.write
@@ -25,7 +25,7 @@ module Vimrunner
       File.read('some_file').strip.should eq 'Contents of the file'
     end
 
-    it "can add a plugin for vim to use" do
+    it "can add a plugin for Vim to use" do
       FileUtils.mkdir_p 'example/plugin'
       File.open('example/plugin/test.vim', 'w') do |f|
         f.write 'command Okay echo "OK"'
@@ -77,7 +77,7 @@ module Vimrunner
     end
 
     describe "#command" do
-      it "returns the output of a vim command" do
+      it "returns the output of a Vim command" do
         client.command(:version).should include '+clientserver'
         client.command('echo "foo"').should eq 'foo'
       end
@@ -86,7 +86,7 @@ module Vimrunner
         client.command("echo 'foo'").should eq 'foo'
       end
 
-      it "raises an error for a non-existent vim command" do
+      it "raises an error for a non-existent Vim command" do
         expect do
           client.command(:nonexistent)
         end.to raise_error Vimrunner::InvalidCommandError

@@ -2,7 +2,7 @@ module Vimrunner
 
   # The Shell module contains functions that interact directly with the shell.
   # They're general utilities that help with some of the specific use cases
-  # that pop up with the vim runner.
+  # that pop up with the Vim runner.
   module Shell
     extend self
 
