@@ -31,7 +31,11 @@ module Vimrunner
       # the "vim" executable is not compiled with clientserver capabilities,
       # the GUI version is started instead.
       def vim_path
-        'vim'
+        if mac?
+          'mvim'
+        else
+          'vim'
+        end
       end
 
       # The default path to use when starting a server with the GUI version of

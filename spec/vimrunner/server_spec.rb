@@ -22,58 +22,105 @@ module Vimrunner
     end
 
     describe "#vim_path" do
-      before :each do
-        Server.stub(:clientserver_enabled? => true)
+      context "with a clientserver-enabled vim" do
+        before :each do
+          Server.stub(:clientserver_enabled? => true)
+        end
+
+        it "can be explicitly overridden" do
+          server = Server.new(:vim_path => '/opt/local/bin/vim')
+          server.vim_path.should eq '/opt/local/bin/vim'
+        end
+
+        context "with GUI" do
+          let(:server) { Server.new(:gui => true) }
+
+          it "defaults to 'mvim' on Mac OS X" do
+            Server.stub(:mac? => true)
+            server.vim_path.should eq 'mvim'
+          end
+
+          it "defaults to 'gvim' on Linux" do
+            Server.stub(:mac? => false)
+            server.vim_path.should eq 'gvim'
+          end
+
+          it "is registered as a GUI" do
+            server.should be_gui
+          end
+        end
+
+        context "without GUI" do
+          let(:server) { Server.new }
+
+          it "defaults to 'mvim' on Mac OS X" do
+            Server.stub(:mac? => true)
+            server.vim_path.should eq 'mvim'
+          end
+
+          it "defaults to 'vim' on Linux" do
+            Server.stub(:mac? => false)
+            server.vim_path.should eq 'vim'
+          end
+
+          it "is not registered as a GUI" do
+            server.should_not be_gui
+          end
+        end
       end
 
-      it "can be explicitly overridden" do
-        server = Server.new(:vim_path => '/opt/local/bin/vim')
-        server.vim_path.should eq '/opt/local/bin/vim'
-      end
+      context "without a clientserver-enabled vim" do
+        before :each do
+          Server.stub(:clientserver_enabled? => false)
+        end
 
-      describe "(with GUI)" do
-        let(:server) { Server.new(:gui => true) }
+        it "will use gvim instead of the override on Linux" do
+          Server.stub(:mac? => false)
+          server = Server.new(:vim_path => '/opt/local/bin/vim')
+          server.vim_path.should eq 'gvim'
+        end
 
-        it "defaults to 'mvim' on Mac OS X" do
+        it "will use mvim instead of the override on Mac OS X" do
           Server.stub(:mac? => true)
+          server = Server.new(:vim_path => '/opt/local/bin/vim')
           server.vim_path.should eq 'mvim'
         end
 
-        it "defaults to 'gvim' on Linux" do
-          Server.stub(:mac? => false)
-          server.vim_path.should eq 'gvim'
-        end
-      end
+        context "with GUI" do
+          let(:server) { Server.new(:gui => true) }
 
-      describe "(without GUI)" do
-        let(:server) { Server.new(:gui => false) }
+          it "defaults to 'mvim' on Mac OS X" do
+            Server.stub(:mac? => true)
+            server.vim_path.should eq 'mvim'
+          end
 
-        it "defaults to 'vim' on Mac OS X" do
-          Server.stub(:mac? => true)
-          server.vim_path.should eq 'vim'
-        end
+          it "defaults to 'gvim' on Linux" do
+            Server.stub(:mac? => false)
+            server.vim_path.should eq 'gvim'
+          end
 
-        it "defaults to 'vim' on Linux" do
-          Server.stub(:mac? => false)
-          server.vim_path.should eq 'vim'
-        end
-
-        it "is not registered as a GUI" do
-          server.should_not be_gui
-        end
-      end
-
-      describe "(without GUI, but without +clientserver)" do
-        let(:server) { Server.new(:gui => false) }
-
-        it "falls back to GUI vim" do
-          Server.stub(:clientserver_enabled? => false, :mac? => false)
-          server.vim_path.should eq 'gvim'
+          it "is registered as a GUI" do
+            server.should be_gui
+          end
         end
 
-        it "is registered as a GUI" do
-          Server.stub(:clientserver_enabled? => false, :mac? => false)
-          server.should be_gui
+        context "without GUI" do
+          let(:server) { Server.new }
+
+          it "falls back to gvim on Linux" do
+            Server.stub(:clientserver_enabled? => false, :mac? => false)
+            server.vim_path.should eq 'gvim'
+          end
+
+          it "falls back to mvim on Mac OS X" do
+            Server.stub(:clientserver_enabled? => false, :mac? => true)
+            server.vim_path.should eq 'mvim'
+          end
+
+          it "is registered as a GUI" do
+            Server.stub(:clientserver_enabled? => false, :mac? => false)
+            server.should be_gui
+          end
         end
       end
     end
