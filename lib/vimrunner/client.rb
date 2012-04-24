@@ -5,6 +5,8 @@ module Vimrunner
   # A Client is simply a proxy to a Vim server. It's initialized with a Server
   # instance and sends commands, keys and signals to it.
   class Client
+    attr_reader :server
+
     def initialize(server)
       @server = server
     end
@@ -102,13 +104,13 @@ module Vimrunner
 
     # Kills the server it's connected to.
     def kill
-      @server.kill
+      server.kill
     end
 
     private
 
     def invoke_vim(*args)
-      args = [@server.vim_path, '--servername', @server.name, *args]
+      args = [server.vim_path, '--servername', server.name, *args]
       Shell.run *args
     end
   end

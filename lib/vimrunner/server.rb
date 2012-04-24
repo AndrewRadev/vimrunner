@@ -21,12 +21,6 @@ module Vimrunner
         server.start
       end
 
-      # A convenience method that returns a new Client instance, connected to
-      # the server.
-      def new_client
-        Client.new(self)
-      end
-
       # The default path to use when starting a server with a terminal Vim. If
       # the "vim" executable is not compiled with clientserver capabilities,
       # the GUI version is started instead.
@@ -124,6 +118,12 @@ module Vimrunner
 
       wait_until_started
       self
+    end
+
+    # A convenience method that returns a new Client instance, connected to
+    # the server.
+    def new_client
+      Client.new(self)
     end
 
     # Returns true if the server is a GUI version of Vim. This can be forced by
