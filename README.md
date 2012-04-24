@@ -1,17 +1,19 @@
 # Vimrunner [![Build Status](https://secure.travis-ci.org/AndrewRadev/vimrunner.png?branch=master)](http://travis-ci.org/AndrewRadev/vimrunner)
 
-Using Vim's client/server functionality, this library exposes a way to spawn a
-Vim instance and control it programatically. Apart from being a fun party
-trick, this could be used to do integration testing on vimscript.
+Using Vim's
+[client/server](http://vimdoc.sourceforge.net/htmldoc/remote.html#clientserver)
+functionality, this library exposes a way to spawn a Vim instance and control
+it programatically. Apart from being a fun party trick, this can be used to
+integration test Vim script.
 
 This is still fairly experimental, so use with caution. Any issue reports or
 contributions are very welcome on the
-[github issue tracker](https://github.com/AndrewRadev/Vimrunner/issues)
+[GitHub issue tracker](https://github.com/AndrewRadev/Vimrunner/issues).
 
 ## Usage
 
 There are two objects that can be used to control Vim, a "server" and a
-"client". The server takes care of spawning a server vim instance that will be
+"client". The server takes care of spawning a server Vim instance that will be
 controlled, and the client is its interface.
 
 A server can be started in two ways:
@@ -21,7 +23,7 @@ A server can be started in two ways:
     start a terminal instance due to missing requirements for the `vim` binary
     (see "Requirements" below), a GUI instance will be started.
   - `Vimrunner::Server.start(:gui => true)`: Starts a GUI instance of Vim. On
-    Linux, it'll be a `gvim`, on Mac it defaults to `mvim`.
+    Linux, it'll be `gvim`, on Mac OS X it defaults to `mvim`.
 
 Both methods return a `Server` instance. For a more comprehensive list of
 options you can start the server with, check out
@@ -48,10 +50,19 @@ the methods on the `Client` class in
 ## Requirements
 
 Vim needs to be compiled with `+clientserver`. This should be available with
-the `normal`, `big` and `huge` featuresets. The client/server functionality
-(regrettably) needs a running X server to function, even for a terminal vim.
-This means that if you're using it for automated tests on a remote server,
-you'll probably need to start it with xvfb.
+the `normal`, `big` and `huge` featuresets or by using
+[MacVim](http://code.google.com/p/macvim/) on Mac OS X. In order to start a
+server without a GUI, you will also need `+xterm-clipboard` [as described in
+the Vim
+manual](http://vimdoc.sourceforge.net/htmldoc/remote.html#x11-clientserver).
+
+The client/server functionality (regrettably) needs a running X server to
+function, even without a GUI. This means that if you're using it for
+automated tests on a remote server, you'll probably need to start it with
+xvfb.
+
+If you are using MacVim, note that you will need the `mvim` binary in your
+`PATH` in order to start and communicate with Vim servers.
 
 ## Experimenting
 
