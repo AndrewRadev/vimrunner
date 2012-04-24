@@ -1,16 +1,13 @@
-require 'fileutils'
-
-ROOT_DIR = File.expand_path('../..', __FILE__)
+require 'tmpdir'
 
 RSpec.configure do |config|
-  config.before :each do
-    FileUtils.cd ROOT_DIR
-    FileUtils.rm_rf 'tmp' if File.exists? 'tmp'
-    FileUtils.mkdir 'tmp'
-    FileUtils.cd 'tmp'
-  end
 
-  config.after :each do
-    FileUtils.cd ROOT_DIR
+  # Create a temporary directory for every test.
+  config.around do |example|
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        example.call
+      end
+    end
   end
 end

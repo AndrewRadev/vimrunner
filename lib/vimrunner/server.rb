@@ -1,10 +1,11 @@
 require 'timeout'
-require 'rbconfig'
-require 'pty'
 
 require 'vimrunner/errors'
 require 'vimrunner/shell'
 require 'vimrunner/client'
+require 'vimrunner/vim'
+require 'vimrunner/gui_vim'
+require 'vimrunner/headless_vim'
 
 module Vimrunner
 
@@ -13,62 +14,14 @@ module Vimrunner
   # on the system, though there are some options that can control this
   # behaviour. See #initialize for more details.
   class Server
-    class << self
 
-      # A convenience method that initializes a new server and starts it.
-      def start(options = {})
-        server = new(options)
-        server.start
-      end
+    attr_reader :name, :pid, :vim
 
-      # The default path to use when starting a server with a terminal Vim. If
-      # the "vim" executable is not compiled with clientserver capabilities,
-      # the GUI version is started instead.
-      def vim_path
-        if mac?
-          'mvim'
-        else
-          'vim'
-        end
-      end
-
-      # The default path to use when starting a server with the GUI version of
-      # Vim. Defaults to "mvim" on a mac and "gvim" on linux.
-      def gui_vim_path
-        if mac?
-          'mvim'
-        else
-          'gvim'
-        end
-      end
-
-      # The path to a vimrc file containing some required vimscript. The server
-      # is started with no settings or a vimrc, apart from this one.
-      def vimrc_path
-        File.join(File.expand_path('../../..', __FILE__), 'vim', 'vimrc')
-      end
-
-      # Returns true if the current operating system is Mac OS X.
-      def mac?
-        host_os =~ /darwin/
-      end
-
-      # Returns true if the given Vim binary is compiled with support for the
-      # client/server functionality.
-      def clientserver_enabled?(vim_path)
-        vim_version = %x[#{vim_path} --version]
-        vim_version.include? '+clientserver' and vim_version.include? '+xterm_clipboard'
-      end
-
-      private
-
-      def host_os
-        RbConfig::CONFIG['host_os']
-      end
+    # A convenience method that initializes a new server and starts it.
+    def self.start(options = {})
+      server = new(options)
+      server.start
     end
-
-    attr_accessor :pid
-    attr_reader :name, :vim_path
 
     # A Server is initialized with two options that control its behaviour:
     #
@@ -92,29 +45,37 @@ module Vimrunner
     #   server = Server.new(:vim_path => '/opt/bin/vim') # Will start a server with the given vim instance
     #
     def initialize(options = {})
-      @gui      = options[:gui]
-      @vim_path = options[:vim_path]
-      @name     = "VIMRUNNER#{rand.to_s}"
+      vim_path = options[:vim_path]
+      gui      = options[:gui]
 
-      if not @vim_path or not Server.clientserver_enabled? @vim_path
-        @vim_path = Server.vim_path
+      @vim = if vim_path && gui
+        GuiVim.new(vim_path)
+      elsif vim_path
+        HeadlessVim.new(vim_path)
+      elsif gui
+        Vim.gui
+      else
+        Vim.server
       end
+    end
 
-      if @gui or not Server.clientserver_enabled? @vim_path
-        @gui      = true
-        @vim_path = Server.gui_vim_path
-      end
+    def name
+      @name ||= "VIMRUNNER#{rand}"
+    end
+
+    def vim_path
+      vim.path
+    end
+
+    def gui?
+      vim.is_a?(GuiVim)
     end
 
     # Starts a Vim server.
     def start
-      command = "#{vim_path} -f -u #{Server.vimrc_path} --noplugin --servername #{name}"
+      command = "#{vim_path} -f -u #{vimrc_path} --noplugin --servername #{name}"
 
-      if gui?
-        @pid = Kernel.spawn(command, [:in, :out, :err] => :close)
-      else
-        _out, _in, @pid = PTY.spawn(command)
-      end
+      @pid = vim.spawn(command)
 
       wait_until_started
       self
@@ -124,12 +85,6 @@ module Vimrunner
     # the server.
     def new_client
       Client.new(self)
-    end
-
-    # Returns true if the server is a GUI version of Vim. This can be forced by
-    # instantiating the server with :gui => true
-    def gui?
-      @gui
     end
 
     # Kills the Vim instance in the background by sending it a TERM signal.
@@ -142,12 +97,18 @@ module Vimrunner
       %x[#{vim_path} --serverlist].strip.split "\n"
     end
 
+    # The path to a vimrc file containing some required vimscript. The server
+    # is started with no settings or a vimrc, apart from this one.
+    def vimrc_path
+      File.join(File.expand_path('../../..', __FILE__), 'vim', 'vimrc')
+    end
+
     private
 
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do
         servers = serverlist
-        while servers.empty? or not servers.include? name
+        until servers.include?(name)
           sleep 0.1
           servers = serverlist
         end

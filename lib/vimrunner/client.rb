@@ -1,4 +1,5 @@
 require 'vimrunner/shell'
+require 'vimrunner/vim'
 
 module Vimrunner
 
@@ -110,8 +111,7 @@ module Vimrunner
     private
 
     def invoke_vim(*args)
-      args = [server.vim_path, '--servername', server.name, *args]
-      Shell.run *args
+      Shell.run(Vim.client.path, '--servername', server.name, *args)
     end
   end
 end
