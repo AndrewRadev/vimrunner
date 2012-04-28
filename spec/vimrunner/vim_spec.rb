@@ -3,9 +3,9 @@ require 'vimrunner/vim'
 
 module Vimrunner
   describe Vim do
-    let(:gvim) { GuiVim.new("gvim") }
-    let(:mvim) { GuiVim.new("mvim") }
-    let(:vim)  { HeadlessVim.new("vim") }
+    let(:gvim) { Driver::Gui.new("gvim") }
+    let(:mvim) { Driver::Gui.new("mvim") }
+    let(:vim)  { Driver::Headless.new("vim") }
 
     describe "#gui" do
       it "returns mvim on Mac OS X" do

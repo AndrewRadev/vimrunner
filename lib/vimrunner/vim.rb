@@ -1,7 +1,7 @@
 require 'rbconfig'
 
-require 'vimrunner/gui_vim'
-require 'vimrunner/headless_vim'
+require 'vimrunner/driver/gui'
+require 'vimrunner/driver/headless'
 
 module Vimrunner
   module Vim
@@ -9,27 +9,27 @@ module Vimrunner
 
     def server
       if clientserver?("vim") && xterm_clipboard?("vim")
-        HeadlessVim.new("vim")
+        Driver::Headless.new("vim")
       elsif mac?
-        GuiVim.new("mvim")
+        Driver::Gui.new("mvim")
       else
-        GuiVim.new("gvim")
+        Driver::Gui.new("gvim")
       end
     end
 
     def client
       if mac? && !clientserver?("vim")
-        GuiVim.new("mvim")
+        Driver::Gui.new("mvim")
       else
-        HeadlessVim.new("vim")
+        Driver::Headless.new("vim")
       end
     end
 
     def gui
       if mac?
-        GuiVim.new("mvim")
+        Driver::Gui.new("mvim")
       else
-        GuiVim.new("gvim")
+        Driver::Gui.new("gvim")
       end
     end
 

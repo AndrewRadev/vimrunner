@@ -4,8 +4,10 @@ require 'vimrunner/errors'
 require 'vimrunner/shell'
 require 'vimrunner/client'
 require 'vimrunner/vim'
-require 'vimrunner/gui_vim'
-require 'vimrunner/headless_vim'
+require 'vimrunner/driver/gui'
+require 'vimrunner/driver/headless'
+
+# TODO (2012-04-28) See if it's possible to avoid referring to drivers directly
 
 module Vimrunner
 
@@ -49,9 +51,9 @@ module Vimrunner
       gui      = options[:gui]
 
       @vim = if vim_path && gui
-        GuiVim.new(vim_path)
+        Driver::Gui.new(vim_path)
       elsif vim_path
-        HeadlessVim.new(vim_path)
+        Driver::Headless.new(vim_path)
       elsif gui
         Vim.gui
       else
@@ -68,7 +70,7 @@ module Vimrunner
     end
 
     def gui?
-      vim.is_a?(GuiVim)
+      vim.is_a?(Driver::Gui)
     end
 
     # Starts a Vim server.
