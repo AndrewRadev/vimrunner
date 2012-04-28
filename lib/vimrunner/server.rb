@@ -17,7 +17,7 @@ module Vimrunner
   # behaviour. See #initialize for more details.
   class Server
 
-    attr_reader :name, :pid, :vim
+    attr_reader :name, :pid, :driver
 
     # A convenience method that initializes a new server and starts it.
     def self.start(options = {})
@@ -47,37 +47,21 @@ module Vimrunner
     #   server = Server.new(:vim_path => '/opt/bin/vim') # Will start a server with the given vim instance
     #
     def initialize(options = {})
-      vim_path = options[:vim_path]
-      gui      = options[:gui]
-
-      @vim = if vim_path && gui
-        Driver::Gui.new(vim_path)
-      elsif vim_path
-        Driver::Headless.new(vim_path)
-      elsif gui
-        Vim.gui
-      else
-        Vim.server
-      end
-    end
-
-    def name
-      @name ||= "VIMRUNNER#{rand}"
+      @driver = choose_driver(options[:vim_path], options[:gui])
+      @name   = "VIMRUNNER#{rand}"
     end
 
     def vim_path
-      vim.path
+      driver.executable
     end
 
     def gui?
-      vim.is_a?(Driver::Gui)
+      driver.is_a?(Driver::Gui)
     end
 
     # Starts a Vim server.
     def start
-      command = "#{vim_path} -f -u #{vimrc_path} --noplugin --servername #{name}"
-
-      @pid = vim.spawn(command)
+      @pid = driver.spawn(name)
 
       wait_until_started
       self
@@ -99,13 +83,19 @@ module Vimrunner
       %x[#{vim_path} --serverlist].strip.split "\n"
     end
 
-    # The path to a vimrc file containing some required vimscript. The server
-    # is started with no settings or a vimrc, apart from this one.
-    def vimrc_path
-      File.join(File.expand_path('../../..', __FILE__), 'vim', 'vimrc')
-    end
-
     private
+
+    def choose_driver(vim_path, force_gui)
+      if vim_path && force_gui
+        Driver::Gui.new(vim_path)
+      elsif vim_path
+        Driver::Headless.new(vim_path)
+      elsif force_gui
+        Vim.gui
+      else
+        Vim.server
+      end
+    end
 
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do

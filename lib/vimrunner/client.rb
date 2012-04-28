@@ -111,7 +111,7 @@ module Vimrunner
     private
 
     def invoke_vim(*args)
-      Shell.run(Vim.client.path, '--servername', server.name, *args)
+      Shell.run(Vim.client.executable, '--servername', server.name, *args)
     end
   end
 end
