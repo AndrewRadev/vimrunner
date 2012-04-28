@@ -1,5 +1,3 @@
-require 'vimrunner/vim'
-
 module Vimrunner
 
   # A Client is simply a proxy to a Vim server. It's initialized with a Server
@@ -45,7 +43,7 @@ module Vimrunner
       escaped_command = vim_command.to_s.gsub("'", "''")
       expression = "VimrunnerEvaluateCommandOutput('#{escaped_command}')"
 
-      invoke_vim('--remote-expr', expression).strip.tap do |output|
+      invoke_vim('--remote-expr', expression).tap do |output|
         raise InvalidCommandError if output =~ /^Vim:E\d+:/
       end
     end

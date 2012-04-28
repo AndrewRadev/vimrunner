@@ -2,7 +2,7 @@ require 'timeout'
 
 require 'vimrunner/errors'
 require 'vimrunner/client'
-require 'vimrunner/vim'
+require 'vimrunner/system'
 require 'vimrunner/driver/gui'
 require 'vimrunner/driver/headless'
 
@@ -46,7 +46,7 @@ module Vimrunner
     #   server = Server.new(:vim_path => '/opt/bin/vim') # Will start a server with the given vim instance
     #
     def initialize(options = {})
-      @driver = choose_driver(options[:vim_path], options[:gui])
+      @driver = System.choose_driver(options[:vim_path], options[:gui])
       @name   = "VIMRUNNER#{rand}"
     end
 
@@ -83,18 +83,6 @@ module Vimrunner
     end
 
     private
-
-    def choose_driver(vim_path, force_gui)
-      if vim_path && force_gui
-        Driver::Gui.new(vim_path)
-      elsif vim_path
-        Driver::Headless.new(vim_path)
-      elsif force_gui
-        Vim.gui
-      else
-        Vim.server
-      end
-    end
 
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do

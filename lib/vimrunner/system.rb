@@ -4,29 +4,33 @@ require 'vimrunner/driver/gui'
 require 'vimrunner/driver/headless'
 
 module Vimrunner
-  module Vim
+  module System
     extend self
 
-    def server
-      if clientserver?("vim") && xterm_clipboard?("vim")
-        Driver::Headless.new("vim")
-      elsif mac?
+    def choose_driver(vim_path, force_gui)
+      if vim_path && force_gui
+        Driver::Gui.new(vim_path)
+      elsif vim_path
+        Driver::Headless.new(vim_path)
+      elsif force_gui
+        gui_driver
+      else
+        headless_driver
+      end
+    end
+
+    def gui_driver
+      if mac?
         Driver::Gui.new("mvim")
       else
         Driver::Gui.new("gvim")
       end
     end
 
-    def client
-      if mac? && !clientserver?("vim")
-        Driver::Gui.new("mvim")
-      else
+    def headless_driver
+      if clientserver?("vim") && xterm_clipboard?("vim")
         Driver::Headless.new("vim")
-      end
-    end
-
-    def gui
-      if mac?
+      elsif mac?
         Driver::Gui.new("mvim")
       else
         Driver::Gui.new("gvim")
