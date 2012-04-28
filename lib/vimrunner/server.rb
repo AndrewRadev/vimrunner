@@ -1,7 +1,6 @@
 require 'timeout'
 
 require 'vimrunner/errors'
-require 'vimrunner/shell'
 require 'vimrunner/client'
 require 'vimrunner/vim'
 require 'vimrunner/driver/gui'
@@ -75,12 +74,12 @@ module Vimrunner
 
     # Kills the Vim instance in the background by sending it a TERM signal.
     def kill
-      Shell.kill(@pid)
+      driver.kill(@pid)
     end
 
     # Retrieve a list of names of currently running Vim servers.
     def serverlist
-      %x[#{vim_path} --serverlist].strip.split "\n"
+      driver.run('--serverlist').split("\n")
     end
 
     private

@@ -1,4 +1,3 @@
-require 'vimrunner/shell'
 require 'vimrunner/vim'
 
 module Vimrunner
@@ -6,10 +5,11 @@ module Vimrunner
   # A Client is simply a proxy to a Vim server. It's initialized with a Server
   # instance and sends commands, keys and signals to it.
   class Client
-    attr_reader :server
+    attr_reader :server, :driver
 
     def initialize(server)
       @server = server
+      @driver = server.driver
     end
 
     # Adds a plugin to Vim's runtime. Initially, Vim is started without
@@ -111,7 +111,7 @@ module Vimrunner
     private
 
     def invoke_vim(*args)
-      Shell.run(Vim.client.executable, '--servername', server.name, *args)
+      driver.run('--servername', server.name, *args)
     end
   end
 end
