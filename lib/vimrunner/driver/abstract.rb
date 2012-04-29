@@ -28,6 +28,14 @@ module Vimrunner
         false
       end
 
+      def suitable?
+        version_info = run('--version')
+        version_info.include?('+clientserver') and version_info.include?('+xterm_clipboard')
+      rescue Errno::ENOENT
+        # vim path was not found
+        false
+      end
+
       private
 
       # The path to a vimrc file containing some required vimscript. The server

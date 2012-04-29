@@ -8,32 +8,25 @@ module Vimrunner
     extend self
 
     def choose_driver(vim_path, force_gui)
-      if vim_path && force_gui
-        Driver::Gui.new(vim_path)
-      elsif vim_path
-        Driver::Headless.new(vim_path)
-      elsif force_gui
+      vim_path ||= default_vim_path(force_gui)
+
+      headless_driver = Driver::Headless.new(vim_path)
+      gui_driver      = Driver::Gui.new(vim_path)
+
+      if force_gui or not headless_driver.suitable?
         gui_driver
       else
         headless_driver
       end
     end
 
-    def gui_driver
+    def default_vim_path(force_gui)
       if mac?
-        Driver::Gui.new("mvim")
+        'mvim'
+      elsif force_gui
+        'gvim'
       else
-        Driver::Gui.new("gvim")
-      end
-    end
-
-    def headless_driver
-      if clientserver?("vim") && xterm_clipboard?("vim")
-        Driver::Headless.new("vim")
-      elsif mac?
-        Driver::Gui.new("mvim")
-      else
-        Driver::Gui.new("gvim")
+        'vim'
       end
     end
 
@@ -41,18 +34,6 @@ module Vimrunner
 
     def mac?
       /darwin/ === RbConfig::CONFIG['host_os']
-    end
-
-    def clientserver?(vim)
-      supports?(vim, "clientserver")
-    end
-
-    def xterm_clipboard?(vim)
-      supports?(vim, "xterm_clipboard")
-    end
-
-    def supports?(vim, feature)
-      %x[#{vim} --version].include?("+#{feature}")
     end
   end
 end
