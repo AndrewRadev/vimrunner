@@ -1,8 +1,8 @@
-require "vimrunner/errors"
-require "vimrunner/client"
-
 require "timeout"
 require "pty"
+
+require "vimrunner/errors"
+require "vimrunner/client"
 
 module Vimrunner
   class Server
@@ -20,7 +20,7 @@ module Vimrunner
         spawn do |r, w, pid|
           begin
             wait_until_started
-            @result = yield(Client.new(self))
+            @result = yield(new_client)
           ensure
             r.close
             w.close
@@ -32,10 +32,11 @@ module Vimrunner
         @r, @w, @pid = spawn
         wait_until_started
 
-        Client.new(self)
+        new_client
       end
     end
 
+    # Kills the Vim instance in the background.
     def kill
       @r.close
       @w.close
@@ -44,6 +45,13 @@ module Vimrunner
       self
     end
 
+    # A convenience method that returns a new Client instance, connected to
+    # the server.
+    def new_client
+      Client.new(self)
+    end
+
+    # Retrieve a list of names of currently running Vim servers.
     def serverlist
       execute([executable, "--serverlist"]).split("\n")
     end

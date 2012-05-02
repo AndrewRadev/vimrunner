@@ -1,6 +1,6 @@
-require "vimrunner/errors"
-
 require "rbconfig"
+
+require "vimrunner/errors"
 
 module Vimrunner
   module Platform

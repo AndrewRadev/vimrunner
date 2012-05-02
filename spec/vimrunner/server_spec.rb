@@ -31,6 +31,16 @@ module Vimrunner
       end
     end
 
+    describe "#new_client" do
+      it "returns a client" do
+        server.new_client.should be_a(Client)
+      end
+
+      it "is attached to the server" do
+        server.new_client.server.should == server
+      end
+    end
+
     describe "#remote_expr" do
       it "uses the server's executable to send remote expressions"
     end
