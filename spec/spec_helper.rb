@@ -1,8 +1,9 @@
-require 'tmpdir'
+require "tmpdir"
 
 RSpec.configure do |config|
 
-  # Create a temporary directory for every test.
+  # Execute each example in its own temporary directory that is automatically
+  # destroyed after every run.
   config.around do |example|
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do

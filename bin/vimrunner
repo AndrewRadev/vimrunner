@@ -5,6 +5,6 @@ $: << File.expand_path('../../lib', __FILE__)
 require 'irb'
 require 'vimrunner'
 
-$vim = Vimrunner.start_gui_vim
+$vim = Vimrunner.start_gvim
 
 IRB.start

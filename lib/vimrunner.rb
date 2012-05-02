@@ -1,16 +1,12 @@
-require 'vimrunner/client'
-require 'vimrunner/server'
+require "vimrunner/server"
+require "vimrunner/platform"
 
 module Vimrunner
-  # Starts a new Server with a terminal Vim instance and returns a client,
-  # connected to it.
-  def self.start_vim
-    Client.new(Server.start)
+  def self.start(vim = Platform.vim, &blk)
+    Server.new(vim).start(&blk)
   end
 
-  # Starts a new Server with a GUI Vim instance and returns a client, connected
-  # to it.
-  def self.start_gui_vim
-    Client.new(Server.start(:gui => true))
+  def self.start_gvim(&blk)
+    Server.new(Platform.gvim).start(&blk)
   end
 end

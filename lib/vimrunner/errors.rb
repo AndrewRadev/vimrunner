@@ -1,4 +1,5 @@
 module Vimrunner
+  class NoSuitableVimError  < RuntimeError; end
   class InvalidCommandError < RuntimeError; end
 
   class TimeoutError < RuntimeError

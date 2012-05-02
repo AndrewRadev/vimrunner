@@ -1,50 +1,42 @@
-require 'spec_helper'
-require 'vimrunner/server'
+require "vimrunner/server"
+require "vimrunner/platform"
 
 module Vimrunner
   describe Server do
-    it "can start a vim server process" do
-      server = Server.start
-      server.serverlist.should include(server.name)
-      server.kill
-    end
+    let(:server) { Server.new(Platform.vim) }
 
-    it "can start more than one vim server process" do
-      begin
-        first  = Server.start
-        second = Server.start
-
-        first.serverlist.should include(first.name, second.name)
-      ensure
-        first.kill
-        second.kill
-      end
-    end
-
-    describe "#new_client" do
-      around do |example|
+    describe "#start" do
+      it "starts a vim server process" do
         begin
-          @server = Server.start
-          example.call
+          server.start
+          server.serverlist.should include(server.name)
         ensure
-          @server.kill
+          server.kill
         end
       end
 
-      it "returns a client" do
-        @server.new_client.should be_a(Client)
-      end
+      it "can start more than one vim server process" do
+        begin
+          first = Server.new(Platform.vim)
+          second = Server.new(Platform.vim)
 
-      it "is attached to the server" do
-        @server.new_client.server.should == @server
+          first.start
+          second.start
+
+          first.serverlist.should include(first.name, second.name)
+        ensure
+          first.kill
+          second.kill
+        end
       end
     end
 
-    describe "#vim_path" do
-      it "can be explicitly overridden" do
-        server = Server.new(:vim_path => '/opt/local/bin/vim')
-        server.vim_path.should eq '/opt/local/bin/vim'
-      end
+    describe "#remote_expr" do
+      it "uses the server's executable to send remote expressions"
+    end
+
+    describe "#remote_send" do
+      it "uses the server's executable to send remote keys"
     end
   end
 end
