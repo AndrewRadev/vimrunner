@@ -1,6 +1,11 @@
 module Vimrunner
-  class NoSuitableVimError  < RuntimeError; end
   class InvalidCommandError < RuntimeError; end
+
+  class NoSuitableVimError < RuntimeError
+    def message
+      "No suitable Vim executable could be found for this system."
+    end
+  end
 
   class TimeoutError < RuntimeError
     def message
