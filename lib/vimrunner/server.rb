@@ -5,16 +5,30 @@ require "vimrunner/errors"
 require "vimrunner/client"
 
 module Vimrunner
+
+  # Public: A Server has the responsibility of starting a Vim process and
+  # communicating with it through the clientserver interface. The process can
+  # be started with "start" and stopped with "kill". A Client would be
+  # necessary as the actual interface, though it is possible to use a Server
+  # directly to invoke --remote commands on its Vim instance.
+  #
   class Server
     VIMRC = File.expand_path("../../../vim/vimrc", __FILE__)
 
     attr_reader :name, :executable
 
+    # Public: Initialize a Server
+    #
+    # executable - a String representing a Vim executable.
     def initialize(executable)
       @executable = executable
       @name = "VIMRUNNER#{rand}"
     end
 
+    # Public: Start a Server. This spawns a background process.
+    #
+    # Returns a new Client instance initialized with this Server
+    # Yields a new Client instance initialized with this Server
     def start
       if block_given?
         spawn do |r, w, pid|
@@ -36,7 +50,9 @@ module Vimrunner
       end
     end
 
-    # Kills the Vim instance in the background.
+    # Public: Kills the Vim instance in the background.
+    #
+    # Returns self.
     def kill
       @r.close
       @w.close
@@ -45,21 +61,37 @@ module Vimrunner
       self
     end
 
-    # A convenience method that returns a new Client instance, connected to
-    # the server.
+    # Public: A convenience method that returns a new Client instance,
+    # connected to this server.
+    #
+    # Returns a Client.
     def new_client
       Client.new(self)
     end
 
-    # Retrieve a list of names of currently running Vim servers.
+    # Public: Retrieves a list of names of currently running Vim servers.
+    #
+    # Returns an Array of Strings.
     def serverlist
       execute([executable, "--serverlist"]).split("\n")
     end
 
+    # Public: Evaluates an expression in the Vim server and returns the result.
+    # A wrapper around --remote-expr.
+    #
+    # expression - a String with a Vim expression to evaluate.
+    #
+    # Returns a String.
     def remote_expr(expression)
       execute([executable, "--servername", name, "--remote-expr", expression])
     end
 
+    # Public: Sends the given keys
+    # A wrapper around --remote-expr.
+    #
+    # keys - a String with a sequence of Vim-compatible keystrokes.
+    #
+    # Returns nothing.
     def remote_send(keys)
       execute([executable, "--servername", name, "--remote-send", keys])
     end

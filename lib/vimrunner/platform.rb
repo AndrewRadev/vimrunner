@@ -3,13 +3,29 @@ require "rbconfig"
 require "vimrunner/errors"
 
 module Vimrunner
+
+  # Public: The Platform module contains logic for finding a Vim executable
+  # that supports the clientserver functionality on the current system. Its
+  # methods can be used to fetch a Vim path for initializing a Server.
+  #
   module Platform
     extend self
 
+    # Public: Looks for a Vim executable that's suitable for the current
+    # platform. Also attempts to find an appropriate GUI vim if terminal ones
+    # are unsuitable.
+    #
+    # Returns a String, the Vim executable.
+    # Raises NoSuitableVimError if none can be found.
     def vim
       vims.find { |vim| suitable?(vim) } or raise NoSuitableVimError
     end
 
+    # Public: Looks for a GUI Vim executable that's suitable for the current
+    # platform.
+    #
+    # Returns a String, the Vim executable.
+    # Raises NoSuitableVimError if none can be found.
     def gvim
       gvims.find { |gvim| suitable?(gvim) } or raise NoSuitableVimError
     end
