@@ -1,3 +1,4 @@
+require "spec_helper"
 require "vimrunner/server"
 require "vimrunner/platform"
 
