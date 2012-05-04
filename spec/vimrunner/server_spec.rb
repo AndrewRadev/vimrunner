@@ -30,6 +30,12 @@ module Vimrunner
           second.kill
         end
       end
+
+      it "can start a vim server process with a block" do
+        server.start do |client|
+          server.serverlist.should include(server.name)
+        end
+      end
     end
 
     describe "#new_client" do
@@ -43,11 +49,38 @@ module Vimrunner
     end
 
     describe "#remote_expr" do
-      it "uses the server's executable to send remote expressions"
+      it "uses the server's executable to send remote expressions" do
+        server.should_receive(:execute).
+          with([server.executable, "--servername", server.name,
+               "--remote-expr", "version"])
+
+        server.remote_expr("version")
+      end
     end
 
     describe "#remote_send" do
-      it "uses the server's executable to send remote keys"
+      it "uses the server's executable to send remote keys" do
+        server.should_receive(:execute).
+          with([server.executable, "--servername", server.name,
+               "--remote-send", "ihello"])
+
+        server.remote_send("ihello")
+      end
+    end
+
+    describe "#serverlist" do
+      it "uses the server's executable to list servers" do
+        server.should_receive(:execute).
+          with([server.executable, "--serverlist"]).and_return("VIM")
+
+        server.serverlist
+      end
+
+      it "splits the servers into an array" do
+        server.stub(:execute => "VIM\nVIM2")
+
+        server.serverlist.should == ["VIM", "VIM2"]
+      end
     end
   end
 end

@@ -15,7 +15,7 @@ module Vimrunner
     # entry_script - The Vim script that's runtime'd to initialize the plugin
     #                (optional).
     #
-    # Example:
+    # Examples
     #
     #   vim.add_plugin 'rails', 'plugin/rails.vim'
     #
@@ -25,6 +25,9 @@ module Vimrunner
       command("runtime #{entry_script}") if entry_script
     end
 
+    # Public: Switches Vim to normal mode and types in the given keys.
+    #
+    # Returns nothing.
     def normal(keys = "")
       server.remote_send("<C-\\><C-n>#{keys}")
     end
@@ -70,7 +73,7 @@ module Vimrunner
     # Public: Sets a setting in Vim. If +value+ is nil, the setting is
     # considered to be a boolean.
     #
-    # Examples:
+    # Examples
     #
     #   vim.set 'expandtab'  # invokes ":set expandtab"
     #   vim.set 'tabstop', 3 # invokes ":set tabstop=3"
@@ -88,6 +91,8 @@ module Vimrunner
     # Note that this doesn't use the '--remote' Vim flag, it simply types in
     # the command manually. This is necessary to avoid the Vim instance
     # getting focus.
+    #
+    # Returns nothing.
     def edit(filename)
       command "edit #{filename}"
     end

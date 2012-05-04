@@ -8,6 +8,10 @@ module Vimrunner
   # that supports the clientserver functionality on the current system. Its
   # methods can be used to fetch a Vim path for initializing a Server.
   #
+  # Examples
+  #
+  #   Vimrunner::Platform.vim
+  #   # => "gvim"
   module Platform
     extend self
 
@@ -15,8 +19,8 @@ module Vimrunner
     # platform. Also attempts to find an appropriate GUI vim if terminal ones
     # are unsuitable.
     #
-    # Returns a String, the Vim executable.
-    # Raises NoSuitableVimError if none can be found.
+    # Returns the String Vim executable.
+    # Raises NoSuitableVimError if no suitable Vim can be found.
     def vim
       vims.find { |vim| suitable?(vim) } or raise NoSuitableVimError
     end
@@ -24,8 +28,8 @@ module Vimrunner
     # Public: Looks for a GUI Vim executable that's suitable for the current
     # platform.
     #
-    # Returns a String, the Vim executable.
-    # Raises NoSuitableVimError if none can be found.
+    # Returns the String Vim executable.
+    # Raises NoSuitableVimError if no suitable Vim can be found.
     def gvim
       gvims.find { |gvim| suitable?(gvim) } or raise NoSuitableVimError
     end

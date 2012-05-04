@@ -11,7 +11,6 @@ module Vimrunner
   # be started with "start" and stopped with "kill". A Client would be
   # necessary as the actual interface, though it is possible to use a Server
   # directly to invoke --remote commands on its Vim instance.
-  #
   class Server
     VIMRC = File.expand_path("../../../vim/vimrc", __FILE__)
 
@@ -27,8 +26,17 @@ module Vimrunner
 
     # Public: Start a Server. This spawns a background process.
     #
-    # Returns a new Client instance initialized with this Server
-    # Yields a new Client instance initialized with this Server
+    # Examples
+    #
+    #   client = Vimrunner::Server.new("vim").start
+    #   # => #<Vimrunner::Client>
+    #
+    #   Vimrunner::Server.new("vim").start do |client|
+    #     client.edit("foo")
+    #   end
+    #
+    # Returns a new Client instance initialized with this Server.
+    # Yields a new Client instance initialized with this Server.
     def start
       if block_given?
         spawn do |r, w, pid|
@@ -71,7 +79,7 @@ module Vimrunner
 
     # Public: Retrieves a list of names of currently running Vim servers.
     #
-    # Returns an Array of Strings.
+    # Returns an Array of String server names currently running.
     def serverlist
       execute([executable, "--serverlist"]).split("\n")
     end
@@ -81,7 +89,7 @@ module Vimrunner
     #
     # expression - a String with a Vim expression to evaluate.
     #
-    # Returns a String.
+    # Returns the String output of the expression.
     def remote_expr(expression)
       execute([executable, "--servername", name, "--remote-expr", expression])
     end

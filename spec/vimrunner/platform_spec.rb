@@ -43,6 +43,19 @@ module Vimrunner
 
         Platform.vim.should == "mvim"
       end
+
+      it "ignores versions of vim that do not exist on the system" do
+        Platform.stub(:mac? => false)
+        IO.stub(:popen) { |command|
+          if command == ["vim", "--version"]
+            raise Errno::ENOENT
+          else
+            "+clientserver"
+          end
+        }
+
+        Platform.vim.should == "gvim"
+      end
     end
 
     describe "#gvim" do
