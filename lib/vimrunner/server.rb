@@ -1,156 +1,122 @@
-require 'timeout'
-require 'rbconfig'
-require 'pty'
+require "timeout"
+require "pty"
 
-require 'vimrunner/errors'
-require 'vimrunner/shell'
-require 'vimrunner/client'
+require "vimrunner/errors"
+require "vimrunner/client"
 
 module Vimrunner
 
-  # The Server is a wrapper around the Vim server process that is controlled by
-  # clients. It will attempt to start the most appropriate Vim binary available
-  # on the system, though there are some options that can control this
-  # behaviour. See #initialize for more details.
+  # Public: A Server has the responsibility of starting a Vim process and
+  # communicating with it through the clientserver interface. The process can
+  # be started with "start" and stopped with "kill". A Client would be
+  # necessary as the actual interface, though it is possible to use a Server
+  # directly to invoke --remote commands on its Vim instance.
   class Server
-    class << self
+    VIMRC = File.expand_path("../../../vim/vimrc", __FILE__)
 
-      # A convenience method that initializes a new server and starts it.
-      def start(options = {})
-        server = new(options)
-        server.start
-      end
+    attr_reader :name, :executable
 
-      # The default path to use when starting a server with a terminal Vim. If
-      # the "vim" executable is not compiled with clientserver capabilities,
-      # the GUI version is started instead.
-      def vim_path
-        if mac?
-          'mvim'
-        else
-          'vim'
-        end
-      end
-
-      # The default path to use when starting a server with the GUI version of
-      # Vim. Defaults to "mvim" on a mac and "gvim" on linux.
-      def gui_vim_path
-        if mac?
-          'mvim'
-        else
-          'gvim'
-        end
-      end
-
-      # The path to a vimrc file containing some required vimscript. The server
-      # is started with no settings or a vimrc, apart from this one.
-      def vimrc_path
-        File.join(File.expand_path('../../..', __FILE__), 'vim', 'vimrc')
-      end
-
-      # Returns true if the current operating system is Mac OS X.
-      def mac?
-        host_os =~ /darwin/
-      end
-
-      # Returns true if the given Vim binary is compiled with support for the
-      # client/server functionality.
-      def clientserver_enabled?(vim_path)
-        vim_version = %x[#{vim_path} --version]
-        vim_version.include? '+clientserver' and vim_version.include? '+xterm_clipboard'
-      end
-
-      private
-
-      def host_os
-        RbConfig::CONFIG['host_os']
-      end
+    # Public: Initialize a Server
+    #
+    # executable - a String representing a Vim executable.
+    def initialize(executable)
+      @executable = executable
+      @name = "VIMRUNNER#{rand}"
     end
 
-    attr_accessor :pid
-    attr_reader :name, :vim_path
-
-    # A Server is initialized with two options that control its behaviour:
+    # Public: Start a Server. This spawns a background process.
     #
-    #   :gui      - Whether or not to start Vim with a GUI, either 'gvim' or 'mvim'
-    #               depending on the OS. The default is false, which means that
-    #               the server will start itself as a terminal instance. Note
-    #               that, if the terminal Vim doesn't have client/server
-    #               support, a GUI version will be started anyway.
+    # Examples
     #
-    #   :vim_path - A path to a custom Vim binary. If this option is not set,
-    #               the server attempts to guess an appropriate one, given the
-    #               :gui option and the current OS.
+    #   client = Vimrunner::Server.new("vim").start
+    #   # => #<Vimrunner::Client>
     #
-    # Note that simply initializing a Server doesn't start the binary. You need
-    # to call the #start method to do that.
+    #   Vimrunner::Server.new("vim").start do |client|
+    #     client.edit("foo")
+    #   end
     #
-    # Examples:
-    #
-    #   server = Server.new                              # Will start a 'vim' if possible
-    #   server = Server.new(:gui => true)                # Will start a 'gvim' or 'mvim' depending on the OS
-    #   server = Server.new(:vim_path => '/opt/bin/vim') # Will start a server with the given vim instance
-    #
-    def initialize(options = {})
-      @gui      = options[:gui]
-      @vim_path = options[:vim_path]
-      @name     = "VIMRUNNER#{rand.to_s}"
-
-      if not @vim_path or not Server.clientserver_enabled? @vim_path
-        @vim_path = Server.vim_path
-      end
-
-      if @gui or not Server.clientserver_enabled? @vim_path
-        @gui      = true
-        @vim_path = Server.gui_vim_path
-      end
-    end
-
-    # Starts a Vim server.
+    # Returns a new Client instance initialized with this Server.
+    # Yields a new Client instance initialized with this Server.
     def start
-      command = "#{vim_path} -f -u #{Server.vimrc_path} --noplugin --servername #{name}"
+      if block_given?
+        spawn do |r, w, pid|
+          begin
+            wait_until_started
+            @result = yield(new_client)
+          ensure
+            r.close
+            w.close
+          end
+        end
 
-      if gui?
-        @pid = Kernel.spawn(command, [:in, :out, :err] => :close)
+        @result
       else
-        _out, _in, @pid = PTY.spawn(command)
-      end
+        @r, @w, @pid = spawn
+        wait_until_started
 
-      wait_until_started
+        new_client
+      end
+    end
+
+    # Public: Kills the Vim instance in the background.
+    #
+    # Returns self.
+    def kill
+      @r.close
+      @w.close
+      Process.detach(@pid)
+
       self
     end
 
-    # A convenience method that returns a new Client instance, connected to
-    # the server.
+    # Public: A convenience method that returns a new Client instance,
+    # connected to this server.
+    #
+    # Returns a Client.
     def new_client
       Client.new(self)
     end
 
-    # Returns true if the server is a GUI version of Vim. This can be forced by
-    # instantiating the server with :gui => true
-    def gui?
-      @gui
-    end
-
-    # Kills the Vim instance in the background by sending it a TERM signal.
-    def kill
-      Shell.kill(@pid)
-    end
-
-    # Retrieve a list of names of currently running Vim servers.
+    # Public: Retrieves a list of names of currently running Vim servers.
+    #
+    # Returns an Array of String server names currently running.
     def serverlist
-      %x[#{vim_path} --serverlist].strip.split "\n"
+      execute([executable, "--serverlist"]).split("\n")
+    end
+
+    # Public: Evaluates an expression in the Vim server and returns the result.
+    # A wrapper around --remote-expr.
+    #
+    # expression - a String with a Vim expression to evaluate.
+    #
+    # Returns the String output of the expression.
+    def remote_expr(expression)
+      execute([executable, "--servername", name, "--remote-expr", expression])
+    end
+
+    # Public: Sends the given keys
+    # A wrapper around --remote-expr.
+    #
+    # keys - a String with a sequence of Vim-compatible keystrokes.
+    #
+    # Returns nothing.
+    def remote_send(keys)
+      execute([executable, "--servername", name, "--remote-send", keys])
     end
 
     private
 
+    def execute(command)
+      IO.popen(command) { |io| io.read.strip }
+    end
+
+    def spawn(&blk)
+      PTY.spawn(executable, "-f", "--servername", name, "-u", VIMRC, &blk)
+    end
+
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do
-        servers = serverlist
-        while servers.empty? or not servers.include? name
-          sleep 0.1
-          servers = serverlist
-        end
+        sleep 0.1 while !serverlist.include?(name)
       end
     end
   end

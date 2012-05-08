@@ -1,9 +1,4 @@
-require 'vimrunner/shell'
-
 module Vimrunner
-
-  # A Client is simply a proxy to a Vim server. It's initialized with a Server
-  # instance and sends commands, keys and signals to it.
   class Client
     attr_reader :server
 
@@ -11,55 +6,74 @@ module Vimrunner
       @server = server
     end
 
-    # Adds a plugin to Vim's runtime. Initially, Vim is started without
-    # sourcing any plugins to ensure a clean state. This method can be used to
-    # populate the instance's environment.
+    # Public: Adds a plugin to Vim's runtime. Initially, Vim is started
+    # without sourcing any plugins to ensure a clean state. This method can be
+    # used to populate the instance's environment.
     #
     # dir          - The base directory of the plugin, the one that contains
     #                its autoload, plugin, ftplugin, etc. directories.
-    # entry_script - The Vim script that's runtime'd to initialize the plugin.
-    #                Optional.
+    # entry_script - The Vim script that's runtime'd to initialize the plugin
+    #                (optional).
     #
-    # Example:
+    # Examples
     #
     #   vim.add_plugin 'rails', 'plugin/rails.vim'
     #
+    # Returns nothing.
     def add_plugin(dir, entry_script = nil)
       command("set runtimepath+=#{dir}")
       command("runtime #{entry_script}") if entry_script
     end
 
-    # Invokes one of the basic actions the Vim server supports, sending a key
-    # sequence. The keys are sent as-is, so it'd probably be better to use the
-    # wrapper methods, #normal, #insert and so on.
+    # Public: Switches Vim to normal mode and types in the given keys.
+    #
+    # Returns nothing.
+    def normal(keys = "")
+      server.remote_send("<C-\\><C-n>#{keys}")
+    end
+
+    # Public: Invokes one of the basic actions the Vim server supports,
+    # sending a key sequence. The keys are sent as-is, so it'd probably be
+    # better to use the wrapper methods, #normal, #insert and so on.
+    #
+    # Returns nothing.
     def type(keys)
-      invoke_vim '--remote-send', keys
+      server.remote_send(keys)
     end
 
-    # Executes the given command in the Vim instance and returns its output,
-    # stripping all surrounding whitespace.
-    def command(vim_command)
-      normal
-
-      escaped_command = vim_command.to_s.gsub("'", "''")
-      expression = "VimrunnerEvaluateCommandOutput('#{escaped_command}')"
-
-      invoke_vim('--remote-expr', expression).strip.tap do |output|
-        raise InvalidCommandError if output =~ /^Vim:E\d+:/
-      end
-    end
-
-    # Starts a search in Vim for the given text. The result is that the cursor
-    # is positioned on its first occurrence.
+    # Public: Starts a search in Vim for the given text. The result is that
+    # the cursor is positioned on its first occurrence.
+    #
+    # Returns nothing.
     def search(text)
       normal
-      type "/#{text}<cr>"
+      type "/#{text}<CR>"
     end
 
-    # Sets a setting in Vim. If +value+ is nil, the setting is considered to be
-    # a boolean.
+    # Public: Switches Vim to insert mode and types in the given text.
     #
-    # Examples:
+    # Returns nothing.
+    def insert(text)
+      normal "i#{text}"
+    end
+
+    # Public: Writes the file being edited to disk. Note that you probably
+    # want to set the file's name first by using Runner#edit.
+    def write
+      command :write
+    end
+
+    # Public: Echo each expression with a space in between.
+    #
+    # Returns the String output.
+    def echo(*expressions)
+      command "echo #{expressions.join(' ')}"
+    end
+
+    # Public: Sets a setting in Vim. If +value+ is nil, the setting is
+    # considered to be a boolean.
+    #
+    # Examples
     #
     #   vim.set 'expandtab'  # invokes ":set expandtab"
     #   vim.set 'tabstop', 3 # invokes ":set tabstop=3"
@@ -72,34 +86,28 @@ module Vimrunner
       end
     end
 
-    # Edits the file +filename+ with Vim.
+    # Public: Edits the file +filename+ with Vim.
     #
     # Note that this doesn't use the '--remote' Vim flag, it simply types in
-    # the command manually. This is necessary to avoid the Vim instance getting
-    # focus.
+    # the command manually. This is necessary to avoid the Vim instance
+    # getting focus.
+    #
+    # Returns nothing.
     def edit(filename)
       command "edit #{filename}"
     end
 
-    # Writes the file being edited to disk. Note that you probably want to set
-    # the file's name first by using Runner#edit.
-    def write
-      command :write
-    end
+    # Public: Executes the given command in the Vim instance and returns its
+    # output, stripping all surrounding whitespace.
+    #
+    # Returns the string output.
+    # Raises InvalidCommandError if the command is not recognised by vim.
+    def command(commands)
+      expression = "VimrunnerEvaluateCommandOutput('#{escape(commands)}')"
 
-    # Echo each expression with a space in between.
-    def echo(*expressions)
-      command "echo #{expressions.join(' ')}"
-    end
-
-    # Switches Vim to insert mode and types in the given text.
-    def insert(text = '')
-      normal "i#{text}"
-    end
-
-    # Switches Vim to normal mode and types in the given keys.
-    def normal(keys = '')
-      type "<c-\\><c-n>#{keys}"
+      server.remote_expr(expression).tap do |output|
+        raise InvalidCommandError if output =~ /^Vim:E\d+:/
+      end
     end
 
     # Kills the server it's connected to.
@@ -109,9 +117,8 @@ module Vimrunner
 
     private
 
-    def invoke_vim(*args)
-      args = [server.vim_path, '--servername', server.name, *args]
-      Shell.run *args
+    def escape(string)
+      string.to_s.gsub("'", "''")
     end
   end
 end

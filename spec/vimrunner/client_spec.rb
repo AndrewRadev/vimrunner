@@ -1,14 +1,12 @@
-require 'spec_helper'
-require 'vimrunner/client'
-require 'vimrunner/server'
+require "spec_helper"
+require "vimrunner"
 
 module Vimrunner
   describe Client do
-    let!(:server) { Server.start }
-    let!(:client) { Client.new(server) }
+    let!(:client) { Vimrunner.start }
 
     after :each do
-      server.kill
+      client.kill
     end
 
     it "is instantiated in the current directory" do
@@ -87,9 +85,9 @@ module Vimrunner
       end
 
       it "raises an error for a non-existent Vim command" do
-        expect do
+        expect {
           client.command(:nonexistent)
-        end.to raise_error Vimrunner::InvalidCommandError
+        }.to raise_error(InvalidCommandError)
       end
     end
   end

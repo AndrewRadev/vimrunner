@@ -1,16 +1,17 @@
-require 'fileutils'
+require "tmpdir"
+require "simplecov"
 
-ROOT_DIR = File.expand_path('../..', __FILE__)
+SimpleCov.start
 
 RSpec.configure do |config|
-  config.before :each do
-    FileUtils.cd ROOT_DIR
-    FileUtils.rm_rf 'tmp' if File.exists? 'tmp'
-    FileUtils.mkdir 'tmp'
-    FileUtils.cd 'tmp'
-  end
 
-  config.after :each do
-    FileUtils.cd ROOT_DIR
+  # Execute each example in its own temporary directory that is automatically
+  # destroyed after every run.
+  config.around do |example|
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        example.call
+      end
+    end
   end
 end

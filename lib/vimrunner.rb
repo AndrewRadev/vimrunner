@@ -1,16 +1,51 @@
-require 'vimrunner/client'
-require 'vimrunner/server'
+require "vimrunner/server"
+require "vimrunner/platform"
 
 module Vimrunner
-  # Starts a new Server with a terminal Vim instance and returns a client,
-  # connected to it.
-  def self.start_vim
-    Client.new(Server.start)
+
+  # Public: Start a Vim process and return a Client through which it can be
+  # controlled.
+  #
+  # vim - The String path to the Vim you wish to use (default: the most
+  #       appropriate Vim for your system).
+  # blk - An optional block which will be passed a Client with which you can
+  #       communicate with the Vim process. Upon exiting the block, the Vim
+  #       process will be terminated.
+  #
+  # Examples
+  #
+  #   client = Vimrunner.start
+  #   # => #<Vimrunner::Client>
+  #
+  #   Vimrunner.start do |client|
+  #     client.command("version")
+  #   end
+  #
+  # Returns a Client for the started Server.
+  def self.start(vim = Platform.vim, &blk)
+    Server.new(vim).start(&blk)
   end
 
-  # Starts a new Server with a GUI Vim instance and returns a client, connected
-  # to it.
-  def self.start_gui_vim
-    Client.new(Server.start(:gui => true))
+  # Public: Start a Vim process with a GUI and return a Client through which
+  # it can be controlled.
+  #
+  # vim - The String path to the Vim you wish to use (default: the most
+  #       appropriate Vim for your system).
+  # blk - An optional block which will be passed a Client with which you can
+  #       communicate with the Vim process. Upon exiting the block, the Vim
+  #       process will be terminated.
+  #
+  # Examples
+  #
+  #   client = Vimrunner.start
+  #   # => #<Vimrunner::Client>
+  #
+  #   Vimrunner.start do |client|
+  #     client.command("version")
+  #   end
+  #
+  # Returns a Client for the started Server.
+  def self.start_gvim(&blk)
+    Server.new(Platform.gvim).start(&blk)
   end
 end
