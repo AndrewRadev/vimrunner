@@ -1,146 +1,85 @@
-require 'spec_helper'
-require 'vimrunner/server'
+require "spec_helper"
+require "vimrunner/server"
+require "vimrunner/platform"
 
 module Vimrunner
   describe Server do
-    it "can start a vim server process" do
-      server = Server.start
-      server.serverlist.should include(server.name)
-      server.kill
-    end
+    let(:server) { Server.new(Platform.vim) }
 
-    it "can start more than one vim server process" do
-      begin
-        first  = Server.start
-        second = Server.start
+    describe "#start" do
+      it "starts a vim server process" do
+        begin
+          server.start
+          server.serverlist.should include(server.name)
+        ensure
+          server.kill
+        end
+      end
 
-        first.serverlist.should include(first.name, second.name)
-      ensure
-        first.kill
-        second.kill
+      it "can start more than one vim server process" do
+        begin
+          first = Server.new(Platform.vim)
+          second = Server.new(Platform.vim)
+
+          first.start
+          second.start
+
+          first.serverlist.should include(first.name, second.name)
+        ensure
+          first.kill
+          second.kill
+        end
+      end
+
+      it "can start a vim server process with a block" do
+        server.start do |client|
+          server.serverlist.should include(server.name)
+        end
       end
     end
 
     describe "#new_client" do
-      around do |example|
-        begin
-          @server = Server.start
-          example.call
-        ensure
-          @server.kill
-        end
-      end
-
       it "returns a client" do
-        @server.new_client.should be_a(Client)
+        server.new_client.should be_a(Client)
       end
 
       it "is attached to the server" do
-        @server.new_client.server.should == @server
+        server.new_client.server.should == server
       end
     end
 
-    describe "#vim_path" do
-      context "with a clientserver-enabled vim" do
-        before :each do
-          Server.stub(:clientserver_enabled? => true)
-        end
+    describe "#remote_expr" do
+      it "uses the server's executable to send remote expressions" do
+        server.should_receive(:execute).
+          with([server.executable, "--servername", server.name,
+               "--remote-expr", "version"])
 
-        it "can be explicitly overridden" do
-          server = Server.new(:vim_path => '/opt/local/bin/vim')
-          server.vim_path.should eq '/opt/local/bin/vim'
-        end
+        server.remote_expr("version")
+      end
+    end
 
-        context "with GUI" do
-          let(:server) { Server.new(:gui => true) }
+    describe "#remote_send" do
+      it "uses the server's executable to send remote keys" do
+        server.should_receive(:execute).
+          with([server.executable, "--servername", server.name,
+               "--remote-send", "ihello"])
 
-          it "defaults to 'mvim' on Mac OS X" do
-            Server.stub(:mac? => true)
-            server.vim_path.should eq 'mvim'
-          end
+        server.remote_send("ihello")
+      end
+    end
 
-          it "defaults to 'gvim' on Linux" do
-            Server.stub(:mac? => false)
-            server.vim_path.should eq 'gvim'
-          end
+    describe "#serverlist" do
+      it "uses the server's executable to list servers" do
+        server.should_receive(:execute).
+          with([server.executable, "--serverlist"]).and_return("VIM")
 
-          it "is registered as a GUI" do
-            server.should be_gui
-          end
-        end
-
-        context "without GUI" do
-          let(:server) { Server.new }
-
-          it "defaults to 'mvim' on Mac OS X" do
-            Server.stub(:mac? => true)
-            server.vim_path.should eq 'mvim'
-          end
-
-          it "defaults to 'vim' on Linux" do
-            Server.stub(:mac? => false)
-            server.vim_path.should eq 'vim'
-          end
-
-          it "is not registered as a GUI" do
-            server.should_not be_gui
-          end
-        end
+        server.serverlist
       end
 
-      context "without a clientserver-enabled vim" do
-        before :each do
-          Server.stub(:clientserver_enabled? => false)
-        end
+      it "splits the servers into an array" do
+        server.stub(:execute => "VIM\nVIM2")
 
-        it "will use gvim instead of the override on Linux" do
-          Server.stub(:mac? => false)
-          server = Server.new(:vim_path => '/opt/local/bin/vim')
-          server.vim_path.should eq 'gvim'
-        end
-
-        it "will use mvim instead of the override on Mac OS X" do
-          Server.stub(:mac? => true)
-          server = Server.new(:vim_path => '/opt/local/bin/vim')
-          server.vim_path.should eq 'mvim'
-        end
-
-        context "with GUI" do
-          let(:server) { Server.new(:gui => true) }
-
-          it "defaults to 'mvim' on Mac OS X" do
-            Server.stub(:mac? => true)
-            server.vim_path.should eq 'mvim'
-          end
-
-          it "defaults to 'gvim' on Linux" do
-            Server.stub(:mac? => false)
-            server.vim_path.should eq 'gvim'
-          end
-
-          it "is registered as a GUI" do
-            server.should be_gui
-          end
-        end
-
-        context "without GUI" do
-          let(:server) { Server.new }
-
-          it "falls back to gvim on Linux" do
-            Server.stub(:clientserver_enabled? => false, :mac? => false)
-            server.vim_path.should eq 'gvim'
-          end
-
-          it "falls back to mvim on Mac OS X" do
-            Server.stub(:clientserver_enabled? => false, :mac? => true)
-            server.vim_path.should eq 'mvim'
-          end
-
-          it "is registered as a GUI" do
-            Server.stub(:clientserver_enabled? => false, :mac? => false)
-            server.should be_gui
-          end
-        end
+        server.serverlist.should == ["VIM", "VIM2"]
       end
     end
   end
