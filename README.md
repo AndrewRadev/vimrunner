@@ -12,40 +12,59 @@ contributions are very welcome on the
 
 ## Usage
 
-There are two objects that can be used to control Vim, a "server" and a
-"client". The server takes care of spawning a server Vim instance that will be
-controlled, and the client is its interface.
+Vimrunner can be used in one of two main ways:
 
-A server can be started in two ways:
-
-  - `Vimrunner::Server.start`: Starts a terminal instance. Since it's
-    "invisible", it's nice for use in automated tests. If it's impossible to
-    start a terminal instance due to missing requirements for the `vim` binary
-    (see "Requirements" below), a GUI instance will be started.
-  - `Vimrunner::Server.start(:gui => true)`: Starts a GUI instance of Vim. On
-    Linux, it'll be `gvim`, on Mac OS X it defaults to `mvim`.
-
-Both methods return a `Server` instance. For a more comprehensive list of
-options you can start the server with, check out
-[the docs](http://rubydoc.info/gems/vimrunner/Vimrunner/Server).
-
-To be able to send commands to the server, you need a client that knows some
-details about it:
-
-``` ruby
-server = Vimrunner::Server.start
-
-client = Vimrunner::Client.new(server)
-# or,
-client = server.new_client
+```ruby
+# Vim will automatically be started and killed.
+Vimrunner.start do |vim|
+  vim.edit "file.txt"
+  vim.insert "Hello"
+  vim.write
+end
 ```
 
-There are also two convenience methods that start a server and return a
-connected client -- `Vimrunner.start_vim` and `Vimrunner.start_gui_vim`.
+```ruby
+# Vim will automatically be started but you must manually kill it when you are
+# finished.
+vim = Vimrunner.start
+vim.edit "file.txt"
+vim.insert "Hello"
+vim.write
+vim.kill
+```
 
-For a full list of methods you can invoke on the remote vim instance, check out
-the methods on the `Client` class in
-[the docs](http://rubydoc.info/gems/vimrunner/Vimrunner/Client).
+Vimrunner will attempt to start up the most suitable version of Vim available,
+meaning:
+
+* `vim` if it supports headlessly creating servers;
+* `mvim` if you are on Mac OS X;
+* `gvim`.
+
+If you wish to always start a GUI Vim (viz. skip using a headless `vim`) then
+you can use `start_gvim` like so:
+
+```ruby
+Vimrunner.start_gvim do |vim|
+  # ...
+end
+```
+
+If you require an even more specific version of Vim, you can pass the path to
+it by instantiating your own `Server` instance like so:
+
+```ruby
+Vimrunner::Server.new("/path/to/my/specific/vim").start do |vim|
+  vim.edit "file.txt"
+end
+```
+
+(You can also use the non-block form of `start` in both of the above
+examples.)
+
+Calling `start` (or `start_gvim`) will return a `Client` instance with which
+you can control Vim. For a full list of methods you can invoke on the remote
+vim instance, check out the [`Client`
+documentation](http://rubydoc.info/gems/vimrunner/Vimrunner/Client).
 
 ## Requirements
 

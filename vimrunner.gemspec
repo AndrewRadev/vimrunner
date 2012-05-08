@@ -7,11 +7,11 @@ Gem::Specification.new do |s|
   s.authors     = ['Andrew Radev']
   s.email       = ['andrey.radev@gmail.com']
   s.homepage    = 'http://github.com/AndrewRadev/vimrunner'
-  s.summary     = 'Lets you control a vim instance through ruby'
+  s.summary     = 'Lets you control a Vim instance through Ruby'
   s.description = <<-D
     Using Vim's client/server functionality, this library exposes a way to
     spawn a Vim instance and control it programatically. Apart from being a fun
-    party trick, this could be used to do integration testing on vimscript.
+    party trick, this can be used to integration test Vim script.
   D
 
   s.add_development_dependency 'rake'
