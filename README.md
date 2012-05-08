@@ -3,8 +3,8 @@
 Using Vim's
 [client/server](http://vimdoc.sourceforge.net/htmldoc/remote.html#clientserver)
 functionality, this library exposes a way to spawn a Vim instance and control
-it programatically. Apart from being a fun party trick, this can be used to
-integration test Vim script.
+it programatically. Apart from being a fun party trick, this can be used to do
+integration testing on Vimscript.
 
 This is still fairly experimental, so use with caution. Any issue reports or
 contributions are very welcome on the
