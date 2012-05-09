@@ -34,9 +34,9 @@ vim.kill
 ```
 
 Vimrunner will attempt to start up the most suitable version of Vim available,
-meaning:
+meaning one of the following:
 
-* `vim` if it supports headlessly creating servers;
+* `vim` if it supports headlessly creating servers (see [Requirements](#requirements) below for more information);
 * `mvim` if you are on Mac OS X;
 * `gvim`.
 
@@ -63,7 +63,7 @@ examples.)
 
 Calling `start` (or `start_gvim`) will return a `Client` instance with which
 you can control Vim. For a full list of methods you can invoke on the remote
-vim instance, check out the [`Client`
+Vim instance, check out the [`Client`
 documentation](http://rubydoc.info/gems/vimrunner/Vimrunner/Client).
 
 ## Requirements
@@ -78,7 +78,7 @@ manual](http://vimdoc.sourceforge.net/htmldoc/remote.html#x11-clientserver).
 The client/server functionality (regrettably) needs a running X server to
 function, even without a GUI. This means that if you're using it for
 automated tests on a remote server, you'll probably need to start it with
-xvfb.
+Xvfb.
 
 If you are using MacVim, note that you will need the `mvim` binary in your
 `PATH` in order to start and communicate with Vim servers.
