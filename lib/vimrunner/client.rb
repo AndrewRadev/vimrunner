@@ -27,24 +27,26 @@ module Vimrunner
 
     # Public: Switches Vim to normal mode and types in the given keys.
     #
-    # Returns nothing.
+    # Returns the Client instance.
     def normal(keys = "")
       server.remote_send("<C-\\><C-n>#{keys}")
+      self
     end
 
     # Public: Invokes one of the basic actions the Vim server supports,
     # sending a key sequence. The keys are sent as-is, so it'd probably be
     # better to use the wrapper methods, #normal, #insert and so on.
     #
-    # Returns nothing.
+    # Returns the Client instance.
     def type(keys)
       server.remote_send(keys)
+      self
     end
 
     # Public: Starts a search in Vim for the given text. The result is that
     # the cursor is positioned on its first occurrence.
     #
-    # Returns nothing.
+    # Returns the Client instance.
     def search(text)
       normal
       type "/#{text}<CR>"
@@ -52,15 +54,18 @@ module Vimrunner
 
     # Public: Switches Vim to insert mode and types in the given text.
     #
-    # Returns nothing.
+    # Returns the Client instance.
     def insert(text)
       normal "i#{text}"
     end
 
     # Public: Writes the file being edited to disk. Note that you probably
     # want to set the file's name first by using Runner#edit.
+    #
+    # Returns the Client instance.
     def write
       command :write
+      self
     end
 
     # Public: Echo each expression with a space in between.
@@ -78,12 +83,14 @@ module Vimrunner
     #   vim.set 'expandtab'  # invokes ":set expandtab"
     #   vim.set 'tabstop', 3 # invokes ":set tabstop=3"
     #
+    # Returns the Client instance
     def set(setting, value = nil)
       if value
         command "set #{setting}=#{value}"
       else
         command "set #{setting}"
       end
+      self
     end
 
     # Public: Edits the file +filename+ with Vim.
@@ -92,15 +99,16 @@ module Vimrunner
     # the command manually. This is necessary to avoid the Vim instance
     # getting focus.
     #
-    # Returns nothing.
+    # Returns the Client instance.
     def edit(filename)
       command "edit #{filename}"
+      self
     end
 
     # Public: Executes the given command in the Vim instance and returns its
     # output, stripping all surrounding whitespace.
     #
-    # Returns the string output.
+    # Returns the String output.
     # Raises InvalidCommandError if the command is not recognised by vim.
     def command(commands)
       expression = "VimrunnerEvaluateCommandOutput('#{escape(commands)}')"

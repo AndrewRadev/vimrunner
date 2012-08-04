@@ -34,6 +34,12 @@ module Vimrunner
       client.command('Okay').should eq 'OK'
     end
 
+    it "can chain several operations" do
+      client.edit('some_file').insert('Contents').write
+      File.exists?('some_file').should be_true
+      File.read('some_file').strip.should eq 'Contents'
+    end
+
     describe "#set" do
       it "activates a boolean setting" do
         client.set 'expandtab'
@@ -47,19 +53,36 @@ module Vimrunner
         client.set 'tabstop', 3
         client.command('echo &tabstop').should eq '3'
       end
+
+      it "can be chained" do
+        client.set('expandtab').set('tabstop', 3)
+        client.command('echo &expandtab').should eq '1'
+        client.command('echo &tabstop').should eq '3'
+      end
     end
 
     describe "#search" do
-      it "positions the cursor on the search term" do
+      before :each do
         client.edit 'some_file'
         client.insert 'one two'
+      end
 
+      it "positions the cursor on the search term" do
         client.search 'two'
         client.normal 'dw'
 
         client.write
 
         File.read('some_file').strip.should eq 'one'
+      end
+
+      it "can be chained" do
+        client.search('two').search('one')
+        client.normal 'dw'
+
+        client.write
+
+        File.read('some_file').strip.should eq 'two'
       end
     end
 
