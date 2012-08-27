@@ -114,7 +114,7 @@ module Vimrunner
       expression = "VimrunnerEvaluateCommandOutput('#{escape(commands)}')"
 
       server.remote_expr(expression).tap do |output|
-        raise InvalidCommandError if output =~ /^Vim:E\d+:/
+        raise InvalidCommandError.new(output) if output =~ /^Vim:E\d+:/
       end
     end
 
