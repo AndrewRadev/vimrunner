@@ -4,6 +4,8 @@ filetype plugin on
 filetype indent on
 syntax on
 
+set noswapfile nobackup
+
 function! VimrunnerEvaluateCommandOutput(command)
   let base_command = split(a:command, '\s\+')[0]
   let base_command = substitute(base_command, '!$', '', '')
