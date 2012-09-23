@@ -105,6 +105,16 @@ module Vimrunner
       self
     end
 
+    # Public: Edits the file +filename+ with Vim using edit!.
+    #
+    # Similar to #edit, only discards any changes to the current buffer.
+    #
+    # Returns the Client instance.
+    def edit!(filename)
+      command "edit! #{filename}"
+      self
+    end
+
     # Public: Executes the given command in the Vim instance and returns its
     # output, stripping all surrounding whitespace.
     #

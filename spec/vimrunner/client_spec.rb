@@ -23,6 +23,18 @@ module Vimrunner
       File.read('some_file').strip.should eq 'Contents of the file'
     end
 
+    it "can execute commands with a bang" do
+      client.edit 'some_file'
+      client.insert 'Contents of the file'
+      client.edit! 'some_other_file'
+      client.insert 'Contents of the other file'
+      client.command :write
+
+      File.exists?('some_file').should be_false
+      File.exists?('some_other_file').should be_true
+      File.read('some_other_file').strip.should eq 'Contents of the other file'
+    end
+
     it "can add a plugin for Vim to use" do
       FileUtils.mkdir_p 'example/plugin'
       File.open('example/plugin/test.vim', 'w') do |f|
