@@ -13,6 +13,7 @@ module Vimrunner
           server.serverlist.should include(server.name)
         ensure
           server.kill
+          server.serverlist.should_not include(server.name)
         end
       end
 
@@ -35,6 +36,8 @@ module Vimrunner
         server.start do |client|
           server.serverlist.should include(server.name)
         end
+
+        server.serverlist.should_not include(server.name)
       end
     end
 
