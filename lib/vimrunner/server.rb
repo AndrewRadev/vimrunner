@@ -46,6 +46,7 @@ module Vimrunner
           ensure
             r.close
             w.close
+            Process.kill(9, pid) rescue Errno::ESRCH
           end
         end
 
@@ -65,6 +66,7 @@ module Vimrunner
       @r.close
       @w.close
       Process.detach(@pid)
+      Process.kill(9, @pid) rescue Errno::ESRCH
 
       self
     end
