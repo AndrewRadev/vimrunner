@@ -21,8 +21,29 @@ module Vimrunner
     #
     # Returns nothing.
     def add_plugin(dir, entry_script = nil)
-      command("set runtimepath+=#{dir}")
+      append_runtimepath(dir)
       command("runtime #{entry_script}") if entry_script
+    end
+
+    # Public: Appends a directory to Vim's runtimepath
+    #
+    # dir - The directory added to the path
+    #
+    # Returns nothing.
+    def append_runtimepath(dir)
+      command("set runtimepath+=#{dir}")
+    end
+
+    # Public: Prepends a directory to Vim's runtimepath. Use this instead of
+    # #append_runtimepath to give the directory higher priority when Vim
+    # runtime's a file.
+    #
+    # dir - The directory added to the path
+    #
+    # Returns nothing.
+    def prepend_runtimepath(dir)
+      runtimepath = echo '&runtimepath'
+      command("set runtimepath=#{dir},#{runtimepath}")
     end
 
     # Public: Switches Vim to normal mode and types in the given keys.

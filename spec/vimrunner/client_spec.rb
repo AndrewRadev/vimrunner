@@ -46,6 +46,29 @@ module Vimrunner
       client.command('Okay').should eq 'OK'
     end
 
+    it "can append a directory to Vim's runtimepath" do
+      FileUtils.mkdir_p 'example'
+      File.open('example/test.vim', 'w') do |f|
+        f.write 'echo "OK"'
+      end
+
+      client.append_runtimepath('example')
+
+      client.command('runtime test.vim').should eq 'OK'
+    end
+
+    it "can prepend a directory to Vim's runtimepath, giving it priority" do
+      FileUtils.mkdir_p 'example_first'
+      FileUtils.mkdir_p 'example_second'
+      File.open('example_first/test.vim', 'w')  { |f| f.write 'echo "first"' }
+      File.open('example_second/test.vim', 'w') { |f| f.write 'echo "second"' }
+
+      client.append_runtimepath('example_first')
+      client.prepend_runtimepath('example_second')
+
+      client.command('runtime test.vim').should eq 'second'
+    end
+
     it "can chain several operations" do
       client.edit('some_file').insert('Contents').write
       File.exists?('some_file').should be_true
