@@ -36,33 +36,22 @@ module Vimrunner
     end
 
     it "can add a plugin for Vim to use" do
-      FileUtils.mkdir_p 'example/plugin'
-      File.open('example/plugin/test.vim', 'w') do |f|
-        f.write 'command Okay echo "OK"'
-      end
-
+      write_file 'example/plugin/test.vim', 'command Okay echo "OK"'
       client.add_plugin('example', 'plugin/test.vim')
 
       client.command('Okay').should eq 'OK'
     end
 
     it "can append a directory to Vim's runtimepath" do
-      FileUtils.mkdir_p 'example'
-      File.open('example/test.vim', 'w') do |f|
-        f.write 'echo "OK"'
-      end
-
+      write_file 'example/test.vim', 'echo "OK"'
       client.append_runtimepath('example')
 
       client.command('runtime test.vim').should eq 'OK'
     end
 
     it "can prepend a directory to Vim's runtimepath, giving it priority" do
-      FileUtils.mkdir_p 'example_first'
-      FileUtils.mkdir_p 'example_second'
-      File.open('example_first/test.vim', 'w')  { |f| f.write 'echo "first"' }
-      File.open('example_second/test.vim', 'w') { |f| f.write 'echo "second"' }
-
+      write_file 'example_first/test.vim', 'echo "first"'
+      write_file 'example_second/test.vim', 'echo "second"'
       client.append_runtimepath('example_first')
       client.prepend_runtimepath('example_second')
 
