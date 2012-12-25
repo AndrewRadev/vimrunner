@@ -66,6 +66,55 @@ you can control Vim. For a full list of methods you can invoke on the remote
 Vim instance, check out the [`Client`
 documentation](http://rubydoc.info/gems/vimrunner/Vimrunner/Client).
 
+## Testing
+
+If you're using Vimrunner for testing vim plugins, take a look at the
+documentation for the
+[Vimrunner::Testing](http://rubydoc.info/gems/vimrunner/Vimrunner/Testing)
+module. It contains a few simple helpers that may make it a bit easier to write
+regression tests in rspec. With them, it could work something like this:
+
+``` ruby
+require 'spec_helper'
+require 'vimrunner/testing'
+
+describe "My Vim plugin" do
+  let(:vim) { some_instance_of_vim }
+
+  around :each do |example|
+    # needed only once for any Vim instance:
+    vim.add_plugin(File.expand_path('../my_plugin_path'), 'plugin/my_plugin.vim')
+
+    # ensure a clean temporary directory for each test:
+    Vimrunner::Testing.tmpdir(vim) do
+      example.call
+    end
+  end
+
+  specify "some behaviour" do
+    Vimrunner::Testing.write_file('test.rb', <<-EOF)
+      def foo
+        bar
+      end
+    EOF
+
+    vim.edit 'test.rb'
+    do_plugin_related_stuff_with(vim)
+    vim.write
+
+    IO.read('test.rb').should eq Vimrunner::Testing.normalize_string_indent(<<-EOF)
+      def bar
+        foo
+      end
+    EOF
+  end
+end
+```
+
+It's possible to make this a lot more concise by including
+`Vimrunner::Testing`, by making your own helper methods that wrap common
+behaviour, by extracting some code to `spec_helper.rb`, and so on.
+
 ## Requirements
 
 Vim needs to be compiled with `+clientserver`. This should be available with
