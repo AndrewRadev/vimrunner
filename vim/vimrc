@@ -6,6 +6,10 @@ syntax on
 
 set noswapfile nobackup
 
+" remove default ~/.vim directories to avoid loading plugins
+set runtimepath-=~/.vim
+set runtimepath-=~/.vim/after
+
 function! VimrunnerEvaluateCommandOutput(command)
   let base_command = split(a:command, '\s\+')[0]
   let base_command = substitute(base_command, '!$', '', '')
