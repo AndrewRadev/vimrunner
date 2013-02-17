@@ -96,6 +96,27 @@ module Vimrunner
       command "echo #{expressions.join(' ')}"
     end
 
+    # Public: Send keys as if they come from a mapping or typed by a user.
+    #
+    # Vim's usual remote-send functionality to send keys to a server does not
+    # respect mappings. As a workaround, the feedkeys() function can be used
+    # to more closely simulate user input.
+    #
+    # Any keys are sent in a double-quoted string so that special keys such as
+    # <CR> and <C-L> can be used. Note that, as per Vim documentation, such
+    # keys should be preceded by a backslash, e.g. '\<CR>' for a carriage
+    # return, '<CR>' will send those four characters separately.
+    #
+    # Examples
+    #
+    #   vim.command 'map <C-R> ihello'
+    #   vim.feedkeys '\<C-R>'
+    #
+    # Returns nothing.
+    def feedkeys(string)
+      server.remote_expr(%Q{feedkeys("#{string}")})
+    end
+
     # Public: Sets a setting in Vim. If +value+ is nil, the setting is
     # considered to be a boolean.
     #
