@@ -121,6 +121,25 @@ module Vimrunner
       end
     end
 
+    describe "#feedkeys" do
+      before :each do
+        client.edit 'some_file'
+        client.command 'map <C-R> ihello'
+      end
+
+      it "sends keys as if they come from a mapping or user" do
+        client.feedkeys('\<C-R>')
+        client.write
+        File.read('some_file').strip.should eq 'hello'
+      end
+
+      it "handles quotes" do
+        client.feedkeys('\<C-R>\'"')
+        client.write
+        File.read('some_file').strip.should eq 'hello\'"'
+      end
+    end
+
     describe "#command" do
       it "returns the output of a Vim command" do
         client.command(:version).should include '+clientserver'
