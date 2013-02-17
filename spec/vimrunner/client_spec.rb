@@ -132,6 +132,12 @@ module Vimrunner
         client.write
         File.read('some_file').strip.should eq 'hello'
       end
+
+      it "handles quotes" do
+        client.feedkeys('\<C-R>\'"')
+        client.write
+        File.read('some_file').strip.should eq 'hello\'"'
+      end
     end
 
     describe "#command" do

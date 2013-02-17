@@ -114,6 +114,7 @@ module Vimrunner
     #
     # Returns nothing.
     def feedkeys(string)
+      string = string.gsub('"', '\"')
       server.remote_expr(%Q{feedkeys("#{string}")})
     end
 
