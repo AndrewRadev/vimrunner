@@ -41,6 +41,20 @@ module Vimrunner
       end
     end
 
+    describe "#connected?" do
+      it "returns true if the server started successfully" do
+        server.start
+        server.should be_connected
+      end
+
+      it "returns true if the given name corresponds to a running Vim instance" do
+        server.start
+        other_server = Server.new(Platform.vim, server.name)
+
+        other_server.should be_connected
+      end
+    end
+
     describe "#new_client" do
       it "returns a client" do
         server.new_client.should be_a(Client)
