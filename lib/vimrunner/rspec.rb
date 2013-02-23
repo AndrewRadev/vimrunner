@@ -8,7 +8,7 @@ module Vimrunner
       attr_accessor :instance, :configuration
 
       def configuration
-        @configuration ||= OpenStruct.new
+        @configuration ||= Configuration.new
       end
 
       def configure
@@ -22,11 +22,20 @@ module Vimrunner
 
         client = Vimrunner.public_send(configuration.start_method)
 
-        if configuration.after_start
-          configuration.after_start.call(client)
+        if configuration.after_start_callback
+          configuration.after_start_callback.call(client)
         end
 
         client
+      end
+
+      class Configuration
+        attr_accessor :start_method, :reuse_server
+        attr_reader :after_start_callback
+
+        def after_start(&block)
+          @after_start_callback = block
+        end
       end
     end
   end
@@ -43,7 +52,7 @@ Vimrunner::RSpec.configure do |config|
   config.reuse_server = false
   config.start_method = :start_gvim
 
-  config.after_start = lambda do |vim|
+  config.after_start do |vim|
   end
 end
 
