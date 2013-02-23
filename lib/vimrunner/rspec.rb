@@ -1,4 +1,3 @@
-require 'ostruct'
 require 'vimrunner'
 require 'vimrunner/testing'
 
