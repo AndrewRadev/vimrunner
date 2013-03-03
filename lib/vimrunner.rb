@@ -23,7 +23,7 @@ module Vimrunner
   #
   # Returns a Client for the started Server.
   def self.start(vim = Platform.vim, &blk)
-    Server.new(vim).start(&blk)
+    Server.new(:executable => vim).start(&blk)
   end
 
   # Public: Start a Vim process with a GUI and return a Client through which
@@ -46,6 +46,6 @@ module Vimrunner
   #
   # Returns a Client for the started Server.
   def self.start_gvim(&blk)
-    Server.new(Platform.gvim).start(&blk)
+    Server.new(:executable => Platform.gvim).start(&blk)
   end
 end

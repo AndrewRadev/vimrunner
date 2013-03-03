@@ -10,7 +10,8 @@ describe Vimrunner do
     end
 
     it "defaults to using the platform vim" do
-      Vimrunner::Server.should_receive(:new).with("vim").and_return(server)
+      Vimrunner::Server.should_receive(:new).with(:executable => "vim").
+        and_return(server)
 
       Vimrunner.start
     end
@@ -22,7 +23,8 @@ describe Vimrunner do
     end
 
     it "defaults to using the platform gvim" do
-      Vimrunner::Server.should_receive(:new).with("gvim").and_return(server)
+      Vimrunner::Server.should_receive(:new).with(:executable => "gvim").
+        and_return(server)
 
       Vimrunner.start_gvim
     end

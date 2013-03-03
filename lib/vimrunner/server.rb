@@ -3,6 +3,7 @@ require "pty"
 
 require "vimrunner/errors"
 require "vimrunner/client"
+require "vimrunner/platform"
 
 module Vimrunner
 
@@ -21,11 +22,14 @@ module Vimrunner
 
     # Public: Initialize a Server
     #
-    # executable - a String representing a Vim executable.
-    # name       - an optional String with the servername to use.
-    def initialize(executable, name = nil)
-      @executable = executable
-      @name = name || "VIMRUNNER#{rand}"
+    # options - The Hash options used to define a server (default: {}):
+    #           :executable - The String Vim executable to use (optional)
+    #                         (default: Platform.vim).
+    #           :name       - The String name of the Vim server (optional)
+    #                         (default: "VIMRUNNER#{rand}").
+    def initialize(options = {})
+      @executable = options.fetch(:executable) { Platform.vim }
+      @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }
     end
 
     # Public: Start a Server. This spawns a background process.

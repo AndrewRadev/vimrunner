@@ -4,7 +4,17 @@ require "vimrunner/platform"
 
 module Vimrunner
   describe Server do
-    let(:server) { Server.new(Platform.vim) }
+    let(:server) { Server.new }
+
+    describe "#initialize" do
+      it "defaults to using Platform.vim for the executable" do
+        server.executable.should eq(Platform.vim)
+      end
+
+      it "defaults to a random name" do
+        server.name.should start_with("VIMRUNNER")
+      end
+    end
 
     describe "#start" do
       it "starts a vim server process" do
@@ -19,8 +29,8 @@ module Vimrunner
 
       it "can start more than one vim server process" do
         begin
-          first = Server.new(Platform.vim)
-          second = Server.new(Platform.vim)
+          first = Server.new
+          second = Server.new
 
           first.start
           second.start
@@ -49,7 +59,7 @@ module Vimrunner
 
       it "returns true if the given name corresponds to a running Vim instance" do
         server.start
-        other_server = Server.new(Platform.vim, server.name)
+        other_server = Server.new(:name => server.name)
 
         other_server.should be_connected
       end
