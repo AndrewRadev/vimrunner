@@ -29,5 +29,22 @@ describe Vimrunner do
       Vimrunner.start_gvim
     end
   end
+
+  describe "#connect" do
+    let(:server) { Vimrunner::Server.new }
+
+    before(:each) do
+      server.start
+    end
+
+    it "connects to an existing server by name" do
+      vim = Vimrunner.connect(server.name)
+      vim.server.name.should eq(server.name)
+    end
+
+    after(:each) do
+      server.kill
+    end
+  end
 end
 
