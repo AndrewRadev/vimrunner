@@ -10,7 +10,8 @@ describe Vimrunner do
     end
 
     it "defaults to using the platform vim" do
-      Vimrunner::Server.should_receive(:new).with("vim").and_return(server)
+      Vimrunner::Server.should_receive(:new).with(:executable => "vim").
+        and_return(server)
 
       Vimrunner.start
     end
@@ -22,9 +23,27 @@ describe Vimrunner do
     end
 
     it "defaults to using the platform gvim" do
-      Vimrunner::Server.should_receive(:new).with("gvim").and_return(server)
+      Vimrunner::Server.should_receive(:new).with(:executable => "gvim").
+        and_return(server)
 
       Vimrunner.start_gvim
+    end
+  end
+
+  describe "#connect" do
+    let(:server) { Vimrunner::Server.new }
+
+    before(:each) do
+      server.start
+    end
+
+    it "connects to an existing server by name" do
+      vim = Vimrunner.connect(server.name)
+      vim.server.name.should eq(server.name)
+    end
+
+    after(:each) do
+      server.kill
     end
   end
 end
