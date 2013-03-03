@@ -51,6 +51,22 @@ module Vimrunner
       end
     end
 
+    describe "#connect" do
+      before(:each) do
+        server.start
+      end
+
+      let(:second_server) { Server.new(:name => server.name) }
+
+      it "returns a client" do
+        second_server.connect.should be_a(Client)
+      end
+
+      it "returns a client connected to the named server" do
+        second_server.connect.server.should eq(second_server)
+      end
+    end
+
     describe "#connected?" do
       it "returns true if the server started successfully" do
         server.start

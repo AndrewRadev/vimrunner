@@ -49,8 +49,7 @@ module Vimrunner
       if block_given?
         spawn do |r, w, pid|
           begin
-            wait_until_started
-            @result = yield(new_client)
+            @result = yield(connect)
           ensure
             r.close
             w.close
@@ -61,10 +60,18 @@ module Vimrunner
         @result
       else
         @r, @w, @pid = spawn
-        wait_until_started
 
-        new_client
+        connect
       end
+    end
+
+    # Public: Connects to the running server by name, blocking if need be.
+    #
+    # Returns a new Client instance initialized with this Server.
+    def connect
+      wait_until_started
+
+      new_client
     end
 
     # Public: Checks if the server is connected to a running Vim instance.
