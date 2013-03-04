@@ -3,14 +3,18 @@ require "pty"
 
 require "vimrunner/errors"
 require "vimrunner/client"
+require "vimrunner/platform"
 
 module Vimrunner
 
   # Public: A Server has the responsibility of starting a Vim process and
   # communicating with it through the clientserver interface. The process can
-  # be started with "start" and stopped with "kill". A Client would be
-  # necessary as the actual interface, though it is possible to use a Server
-  # directly to invoke --remote commands on its Vim instance.
+  # be started with "start" and stopped with "kill". If given the servername of
+  # an existing Vim instance, it can control that instance without the need to
+  # start a new process.
+  #
+  # A Client would be necessary as the actual interface, though it is possible
+  # to use a Server directly to invoke --remote commands on its Vim instance.
   class Server
     VIMRC = File.expand_path("../../../vim/vimrc", __FILE__)
 
@@ -18,10 +22,14 @@ module Vimrunner
 
     # Public: Initialize a Server
     #
-    # executable - a String representing a Vim executable.
-    def initialize(executable)
-      @executable = executable
-      @name = "VIMRUNNER#{rand}"
+    # options - The Hash options used to define a server (default: {}):
+    #           :executable - The String Vim executable to use (optional)
+    #                         (default: Platform.vim).
+    #           :name       - The String name of the Vim server (optional)
+    #                         (default: "VIMRUNNER#{rand}").
+    def initialize(options = {})
+      @executable = options.fetch(:executable) { Platform.vim }
+      @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }
     end
 
     # Public: Start a Server. This spawns a background process.
@@ -41,8 +49,7 @@ module Vimrunner
       if block_given?
         spawn do |r, w, pid|
           begin
-            wait_until_started
-            @result = yield(new_client)
+            @result = yield(connect)
           ensure
             r.close
             w.close
@@ -53,10 +60,25 @@ module Vimrunner
         @result
       else
         @r, @w, @pid = spawn
-        wait_until_started
 
-        new_client
+        connect
       end
+    end
+
+    # Public: Connects to the running server by name, blocking if need be.
+    #
+    # Returns a new Client instance initialized with this Server.
+    def connect
+      wait_until_started
+
+      new_client
+    end
+
+    # Public: Checks if the server is connected to a running Vim instance.
+    #
+    # Returns a Boolean
+    def connected?
+      serverlist.include?(name)
     end
 
     # Public: Kills the Vim instance in the background.
@@ -117,7 +139,7 @@ module Vimrunner
 
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do
-        sleep 0.1 while !serverlist.include?(name)
+        sleep 0.1 while !connected?
       end
     end
   end
