@@ -177,13 +177,12 @@ module Vimrunner
 
     private
 
-    # Note that this "escapes" key sequences such as <c-w> to < <bs>c-w> since
-    # it doesn't seem possible to feed these sequences to Vim through
-    # remote_send without them being evaluated immediately.
+    # Note that this "escapes" all `<` keys to `<lt>` to ensure they are not
+    # evaluated as keys.
     def escape(string)
       string.to_s.
         gsub("'", "''").
-        gsub(/<[acdms]-(.*?)>/i, '< <bs>c-\1>')
+        gsub('<', '<lt>')
     end
   end
 end
