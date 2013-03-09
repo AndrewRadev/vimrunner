@@ -3,45 +3,34 @@ require 'vimrunner/testing'
 
 module Vimrunner
   module RSpec
-    class << self
-      attr_accessor :instance, :configuration
+    class Configuration
+      attr_accessor :reuse_server
 
-      def configuration
-        @configuration ||= Configuration.new
+      def start_vim(&block)
+        @start_vim_method = block
       end
 
-      def configure
-        yield configuration
+      def start_vim_method
+        @start_vim_method || lambda { Vimrunner.start }
       end
+    end
 
-      def start
-        if not %w(start start_gvim).include?(configuration.start_method.to_s)
-          raise "Don't know how to start Vimrunner with '#{configuration.start_method}'"
-        end
+    def self.configuration
+      @configuration ||= Configuration.new
+    end
 
-        client = Vimrunner.public_send(configuration.start_method)
-
-        if configuration.after_start_callback
-          configuration.after_start_callback.call(client)
-        end
-
-        client
-      end
-
-      class Configuration
-        attr_accessor :start_method, :reuse_server
-        attr_reader :after_start_callback
-
-        def after_start(&block)
-          @after_start_callback = block
-        end
-      end
+    def self.configure
+      yield configuration
     end
   end
 
   module Testing
+    class << self
+      attr_accessor :instance
+    end
+
     def vim
-      Vimrunner::RSpec.instance ||= Vimrunner::RSpec.start
+      Testing.instance ||= Vimrunner::RSpec.configuration.start_vim_method.call
     end
   end
 end
@@ -49,10 +38,6 @@ end
 # Default configuration
 Vimrunner::RSpec.configure do |config|
   config.reuse_server = false
-  config.start_method = :start_gvim
-
-  config.after_start do |vim|
-  end
 end
 
 RSpec.configure do |config|
@@ -82,13 +67,14 @@ RSpec.configure do |config|
   end
 
   config.before(:each) do
-    if not Vimrunner::RSpec.configuration.reuse_server
-      Vimrunner::RSpec.instance = nil
+    unless Vimrunner::RSpec.configuration.reuse_server
+      Vimrunner::Testing.instance.kill if Vimrunner::Testing.instance
+      Vimrunner::Testing.instance = nil
     end
   end
 
   # Kill the Vim server after all tests are over.
   config.after(:suite) do
-    Vimrunner::RSpec.instance.kill if Vimrunner::RSpec.instance
+    Vimrunner::Testing.instance.kill if Vimrunner::Testing.instance
   end
 end
