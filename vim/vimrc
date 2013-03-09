@@ -10,17 +10,19 @@ set noswapfile nobackup
 set runtimepath-=~/.vim
 set runtimepath-=~/.vim/after
 
+" Used to hold the output of VimrunnerEvaluateCommandOutput. Expected to be
+" queried immediately after that function is called.
+let g:_vimrunner_output = ''
+
 function! VimrunnerEvaluateCommandOutput(command)
-  let base_command = split(a:command, '\s\+')[0]
-  let base_command = substitute(base_command, '!$', '', '')
+  let v:errmsg = ''
 
-  if !exists(':'.base_command)
-    let output = 'Vim:E492: Not an editor command: '.base_command
-  else
-    redir => output
-    silent exe a:command
-    redir END
+  redir => g:_vimrunner_output
+  silent! exe a:command
+  redir END
+
+  if v:errmsg != ''
+    let g:_vimrunner_output = v:errmsg
+    let v:errmsg = ''
   endif
-
-  return output
 endfunction

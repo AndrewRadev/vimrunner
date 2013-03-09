@@ -164,10 +164,9 @@ module Vimrunner
     # Returns the String output.
     # Raises InvalidCommandError if the command is not recognised by vim.
     def command(commands)
-      expression = "VimrunnerEvaluateCommandOutput('#{escape(commands)}')"
-
-      server.remote_expr(expression).tap do |output|
-        raise InvalidCommandError.new(output) if output =~ /^Vim:E\d+:/
+      normal(":call VimrunnerEvaluateCommandOutput('#{escape(commands)}')<cr>")
+      server.remote_expr('g:_vimrunner_output').tap do |output|
+        raise InvalidCommandError.new(output) if output =~ /^E\d+:/
       end
     end
 
@@ -178,8 +177,13 @@ module Vimrunner
 
     private
 
+    # Note that this "escapes" key sequences such as <c-w> to < <bs>c-w> since
+    # it doesn't seem possible to feed these sequences to Vim through
+    # remote_send without them being evaluated immediately.
     def escape(string)
-      string.to_s.gsub("'", "''")
+      string.to_s.
+        gsub("'", "''").
+        gsub(/<[acdms]-(.*?)>/i, '< <bs>c-\1>')
     end
   end
 end
