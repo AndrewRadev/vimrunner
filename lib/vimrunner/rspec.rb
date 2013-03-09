@@ -45,22 +45,8 @@ RSpec.configure do |config|
   # Include the Testing DSL into all examples.
   config.include(Vimrunner::Testing)
 
-  # This only applies to example groups with :filesystem => true in their
-  # metadata meaning that you can easily opt-in.
-  #
-  # Examples
-  #
-  #   describe "#write", :filesystem => true do
-  #     it "saves to disk" do
-  #       vim.edit("foo")
-  #       vim.insert("bar")
-  #       vim.write
-  #
-  #       expect(File.read("foo").chomp).to eq("bar")
-  #     end
-  #   end
-  #
-  config.around(:each, :filesystem => true) do |example|
+  # Each example is executed in a separate directory
+  config.around(:each) do |example|
     tmpdir(vim) do
       example.run
     end
