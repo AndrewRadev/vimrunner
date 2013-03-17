@@ -6,28 +6,6 @@ module Vimrunner
   # testing purposes.
   module Testing
 
-    # Public: Within the given block, switches to a temporary directory for
-    # isolation purposes.
-    #
-    # Example:
-    #
-    #   tmpdir(vim) do
-    #     puts vim.command('pwd')
-    #   end
-    #
-    # vim - a Vimrunner::Client instance
-    #
-    # Returns nothing.
-    # Yields nothing.
-    def tmpdir(vim)
-      Dir.mktmpdir do |dir|
-        Dir.chdir(dir) do
-          vim.command("cd #{dir}")
-          yield
-        end
-      end
-    end
-
     # Public: Writes the given string to the file identified by "filename".
     #
     # Uses #normalize_string_indent to ensure consistent indentation when given

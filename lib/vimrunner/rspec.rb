@@ -47,8 +47,11 @@ RSpec.configure do |config|
 
   # Each example is executed in a separate directory
   config.around(:each) do |example|
-    tmpdir(vim) do
-      example.run
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        vim.command("cd #{dir}")
+        example.run
+      end
     end
   end
 
