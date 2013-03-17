@@ -16,19 +16,6 @@ module Vimrunner
       sample.should eq "def foo\n  bar\nend"
     end
 
-    specify "#tmpdir" do
-      Vimrunner.start do |vim|
-        current_directory = Dir.getwd
-
-        vim.command('pwd').should eq current_directory
-
-        tmpdir(vim) do
-          Dir.getwd.should_not eq current_directory
-          vim.command('pwd').should_not eq current_directory
-        end
-      end
-    end
-
     specify "#write_file" do
       Vimrunner.start do |vim|
         write_file 'written_by_ruby.txt', <<-EOF
