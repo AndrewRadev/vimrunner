@@ -10,19 +10,34 @@ set noswapfile nobackup
 set runtimepath-=~/.vim
 set runtimepath-=~/.vim/after
 
-" Used to hold the output of VimrunnerEvaluateCommandOutput. Expected to be
-" queried immediately after that function is called.
-let g:_vimrunner_output = ''
-
 function! VimrunnerEvaluateCommandOutput(command)
-  let v:errmsg = ''
+  let output = ''
 
-  redir => g:_vimrunner_output
-  silent! exe a:command
-  redir END
+  try
+    redir => output
+    silent exe a:command
+    redir END
 
-  if v:errmsg != ''
-    let g:_vimrunner_output = v:errmsg
-    let v:errmsg = ''
-  endif
+    let output = s:StripSilencedErrors(output)
+  catch
+    let output = v:exception
+  endtry
+
+  return output
+endfunction
+
+" Remove errors from the output that have been silenced by :silent!. These are
+" visible in the captured output since all messages are captured by :redir.
+function! s:StripSilencedErrors(output)
+  let processed_output = []
+
+  for line in reverse(split(a:output, "\n"))
+    if line =~ '^E\d\+:'
+      break
+    endif
+
+    call add(processed_output, line)
+  endfor
+
+  return join(reverse(processed_output), "\n")
 endfunction

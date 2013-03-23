@@ -164,9 +164,8 @@ module Vimrunner
     # Returns the String output.
     # Raises InvalidCommandError if the command is not recognised by vim.
     def command(commands)
-      normal(":call VimrunnerEvaluateCommandOutput('#{escape(commands)}')<cr>")
-      server.remote_expr('g:_vimrunner_output').tap do |output|
-        raise InvalidCommandError.new(output) if output =~ /^E\d+:/
+      server.remote_expr("VimrunnerEvaluateCommandOutput('#{escape(commands)}')").tap do |output|
+        raise InvalidCommandError.new(output) if output =~ /^Vim:E\d+:/
       end
     end
 
@@ -177,12 +176,8 @@ module Vimrunner
 
     private
 
-    # Note that this "escapes" all `<` keys to `<lt>` to ensure they are not
-    # evaluated as keys.
     def escape(string)
-      string.to_s.
-        gsub("'", "''").
-        gsub('<', '<lt>')
+      string.to_s.gsub("'", "''")
     end
   end
 end
