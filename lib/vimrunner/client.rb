@@ -144,7 +144,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit(filename)
-      command "edit #{filename}"
+      command "edit #{filename_escape(filename)}"
       self
     end
 
@@ -154,7 +154,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit!(filename)
-      command "edit! #{filename}"
+      command "edit! #{filename_escape(filename)}"
       self
     end
 
@@ -172,6 +172,10 @@ module Vimrunner
     # Kills the server it's connected to.
     def kill
       server.kill
+    end
+
+    def filename_escape(name)
+      name.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
     end
 
     private

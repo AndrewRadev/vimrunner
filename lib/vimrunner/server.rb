@@ -17,8 +17,9 @@ module Vimrunner
   # to use a Server directly to invoke --remote commands on its Vim instance.
   class Server
     VIMRC = File.expand_path("../../../vim/vimrc", __FILE__)
+    VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
 
-    attr_reader :name, :executable
+    attr_reader :name, :executable, :vimrc
 
     # Public: Initialize a Server
     #
@@ -30,6 +31,7 @@ module Vimrunner
     def initialize(options = {})
       @executable = options.fetch(:executable) { Platform.vim }
       @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }
+      @vimrc      = options.fetch(:vimrc) { VIMRC }
     end
 
     # Public: Start a Server. This spawns a background process.
@@ -69,9 +71,16 @@ module Vimrunner
     #
     # Returns a new Client instance initialized with this Server.
     def connect
-      wait_until_started
+      begin
+        wait_until_started
+      rescue TimeoutError
+        @r, @w, @pid = spawn
+        wait_until_started
+      end
+      client = new_client
+      client.feedkeys(":\\<C-u>silent source #{client.filename_escape(VIMRUNNER_RC)}\\<CR>")
 
-      new_client
+      return client
     end
 
     # Public: Checks if the server is connected to a running Vim instance.
@@ -134,7 +143,7 @@ module Vimrunner
     end
 
     def spawn(&blk)
-      PTY.spawn(executable, "-f", "--servername", name, "-u", VIMRC, &blk)
+      PTY.spawn(executable, "-f", "--servername", name, "-u", vimrc, &blk)
     end
 
     def wait_until_started
