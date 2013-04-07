@@ -49,21 +49,17 @@ module Vimrunner
     # Returns a new Client instance initialized with this Server.
     # Yields a new Client instance initialized with this Server.
     def start
+      @r, @w, @pid = spawn
       if block_given?
-        spawn do |r, w, pid|
-          begin
-            @result = yield(connect)
-          ensure
-            r.close
-            w.close
-            Process.kill(9, pid) rescue Errno::ESRCH
-          end
+        begin
+          @result = yield(connect)
+        ensure
+          r.close
+          w.close
+          Process.kill(9, pid) rescue Errno::ESRCH
         end
-
         @result
       else
-        @r, @w, @pid = spawn
-
         connect
       end
     end
@@ -71,13 +67,12 @@ module Vimrunner
     # Public: Connects to the running server by name, blocking if need be.
     #
     # Returns a new Client instance initialized with this Server.
-    def connect
-      begin
-        wait_until_started
-      rescue TimeoutError
+    def connect(options = {})
+      if options[:spawn]
         @r, @w, @pid = spawn
-        wait_until_started
       end
+      wait_until_started
+
       client = new_client
       client.feedkeys(":\\<C-u>source #{client.fesc(VIMRUNNER_RC)}\\<CR>")
 
@@ -140,14 +135,15 @@ module Vimrunner
     private
 
     def foreground_option
-      '-f' if @foreground
+      @foreground ? '-f' : ''
     end
+
     def execute(command)
       IO.popen(command) { |io| io.read.strip }
     end
 
-    def spawn(&blk)
-      PTY.spawn(executable, foreground_option, "--servername", name, "-u", vimrc, &blk)
+    def spawn
+      PTY.spawn("#{executable} #{foreground_option} --servername #{name} -u #{vimrc}")
     end
 
     def wait_until_started
