@@ -32,6 +32,7 @@ module Vimrunner
       @executable = options.fetch(:executable) { Platform.vim }
       @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }
       @vimrc      = options.fetch(:vimrc) { VIMRC }
+      @foreground = options.fetch(:foreground, true)
     end
 
     # Public: Start a Server. This spawns a background process.
@@ -138,12 +139,15 @@ module Vimrunner
 
     private
 
+    def foreground_option
+      '-f' if @foreground
+    end
     def execute(command)
       IO.popen(command) { |io| io.read.strip }
     end
 
     def spawn(&blk)
-      PTY.spawn(executable, "-f", "--servername", name, "-u", vimrc, &blk)
+      PTY.spawn(executable, foreground_option, "--servername", name, "-u", vimrc, &blk)
     end
 
     def wait_until_started
