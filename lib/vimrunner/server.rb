@@ -68,7 +68,7 @@ module Vimrunner
     #
     # Returns a new Client instance initialized with this Server.
     def connect(options = {})
-      if options[:spawn]
+      if !connected? && options[:spawn]
         @r, @w, @pid = spawn
       end
       wait_until_started
