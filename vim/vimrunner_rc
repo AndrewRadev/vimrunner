@@ -29,3 +29,5 @@ function! s:StripSilencedErrors(output)
 
   return join(reverse(processed_output), "\n")
 endfunction
+
+" vim: set ft=vim

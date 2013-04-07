@@ -144,7 +144,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit(filename)
-      command "edit #{filename_escape(filename)}"
+      command "edit #{fesc(filename)}"
       self
     end
 
@@ -154,7 +154,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit!(filename)
-      command "edit! #{filename_escape(filename)}"
+      command "edit! #{fesc(filename)}"
       self
     end
 
@@ -177,6 +177,8 @@ module Vimrunner
     def filename_escape(name)
       name.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
     end
+
+    alias_method :fesc, :filename_escape
 
     private
 

@@ -78,7 +78,7 @@ module Vimrunner
         wait_until_started
       end
       client = new_client
-      client.feedkeys(":\\<C-u>silent source #{client.filename_escape(VIMRUNNER_RC)}\\<CR>")
+      client.feedkeys(":\\<C-u>source #{client.fesc(VIMRUNNER_RC)}\\<CR>")
 
       return client
     end
