@@ -54,9 +54,9 @@ module Vimrunner
         begin
           @result = yield(connect)
         ensure
-          r.close
-          w.close
-          Process.kill(9, pid) rescue Errno::ESRCH
+          @r.close
+          @w.close
+          Process.kill(9, @pid) rescue Errno::ESRCH
         end
         @result
       else
@@ -74,7 +74,7 @@ module Vimrunner
       wait_until_started
 
       client = new_client
-      client.feedkeys(":\\<C-u>source #{client.fesc(VIMRUNNER_RC)}\\<CR>")
+      client.source(VIMRUNNER_RC)
 
       return client
     end

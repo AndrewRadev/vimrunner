@@ -25,6 +25,19 @@ module Vimrunner
       command("runtime #{entry_script}") if entry_script
     end
 
+    # Public: source a script in Vim server
+    #
+    # script - The Vim script to be sourced
+    #
+    # Examples
+    #
+    #   vim.source '/path/to/plugin/rails.vim'
+    #
+    # Returns nothing.
+    def source(script)
+      feedkeys(":\\<C-u>source #{fesc(script)}\\<CR>")
+    end
+
     # Public: Appends a directory to Vim's runtimepath
     #
     # dir - The directory added to the path
