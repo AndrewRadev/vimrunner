@@ -35,7 +35,7 @@ module Vimrunner
     #
     # Returns nothing.
     def source(script)
-      feedkeys(":\\<C-u>source #{fesc(script)}\\<CR>")
+      feedkeys(":\\<C-u>source #{filename_escape(script)}\\<CR>")
     end
 
     # Public: Appends a directory to Vim's runtimepath
@@ -157,7 +157,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit(filename)
-      command "edit #{fesc(filename)}"
+      command "edit #{filename_escape(filename)}"
       self
     end
 
@@ -167,7 +167,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit!(filename)
-      command "edit! #{fesc(filename)}"
+      command "edit! #{filename_escape(filename)}"
       self
     end
 
@@ -191,7 +191,7 @@ module Vimrunner
       name.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
     end
 
-    alias_method :fesc, :filename_escape
+
 
     private
 
