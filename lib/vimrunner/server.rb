@@ -17,8 +17,9 @@ module Vimrunner
   # to use a Server directly to invoke --remote commands on its Vim instance.
   class Server
     VIMRC = File.expand_path("../../../vim/vimrc", __FILE__)
+    VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
 
-    attr_reader :name, :executable
+    attr_reader :name, :executable, :vimrc
 
     # Public: Initialize a Server
     #
@@ -30,6 +31,8 @@ module Vimrunner
     def initialize(options = {})
       @executable = options.fetch(:executable) { Platform.vim }
       @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }
+      @vimrc      = options.fetch(:vimrc) { VIMRC }
+      @foreground = options.fetch(:foreground, true)
     end
 
     # Public: Start a Server. This spawns a background process.
@@ -46,21 +49,17 @@ module Vimrunner
     # Returns a new Client instance initialized with this Server.
     # Yields a new Client instance initialized with this Server.
     def start
+      @r, @w, @pid = spawn
       if block_given?
-        spawn do |r, w, pid|
-          begin
-            @result = yield(connect)
-          ensure
-            r.close
-            w.close
-            Process.kill(9, pid) rescue Errno::ESRCH
-          end
+        begin
+          @result = yield(connect)
+        ensure
+          @r.close
+          @w.close
+          Process.kill(9, @pid) rescue Errno::ESRCH
         end
-
         @result
       else
-        @r, @w, @pid = spawn
-
         connect
       end
     end
@@ -68,10 +67,16 @@ module Vimrunner
     # Public: Connects to the running server by name, blocking if need be.
     #
     # Returns a new Client instance initialized with this Server.
-    def connect
+    def connect(options = {})
+      if !connected? && options[:spawn]
+        @r, @w, @pid = spawn
+      end
       wait_until_started
 
-      new_client
+      client = new_client
+      client.source(VIMRUNNER_RC)
+
+      return client
     end
 
     # Public: Checks if the server is connected to a running Vim instance.
@@ -129,12 +134,16 @@ module Vimrunner
 
     private
 
+    def foreground_option
+      @foreground ? '-f' : ''
+    end
+
     def execute(command)
       IO.popen(command) { |io| io.read.strip }
     end
 
-    def spawn(&blk)
-      PTY.spawn(executable, "-f", "--servername", name, "-u", VIMRC, &blk)
+    def spawn
+      PTY.spawn("#{executable} #{foreground_option} --servername #{name} -u #{vimrc}")
     end
 
     def wait_until_started

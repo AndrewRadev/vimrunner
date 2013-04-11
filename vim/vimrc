@@ -10,34 +10,4 @@ set noswapfile nobackup
 set runtimepath-=~/.vim
 set runtimepath-=~/.vim/after
 
-function! VimrunnerEvaluateCommandOutput(command)
-  let output = ''
-
-  try
-    redir => output
-    silent exe a:command
-    redir END
-
-    let output = s:StripSilencedErrors(output)
-  catch
-    let output = v:exception
-  endtry
-
-  return output
-endfunction
-
-" Remove errors from the output that have been silenced by :silent!. These are
-" visible in the captured output since all messages are captured by :redir.
-function! s:StripSilencedErrors(output)
-  let processed_output = []
-
-  for line in reverse(split(a:output, "\n"))
-    if line =~ '^E\d\+:'
-      break
-    endif
-
-    call add(processed_output, line)
-  endfor
-
-  return join(reverse(processed_output), "\n")
-endfunction
+execute "source " . expand('<sfile>:p:h') . "/vimrunner_rc"
