@@ -35,7 +35,7 @@ module Vimrunner
     #
     # Returns nothing.
     def source(script)
-      feedkeys(":\\<C-u>source #{filename_escape(script)}\\<CR>")
+      feedkeys(":\\<C-u>source #{escape_filename(script)}\\<CR>")
     end
 
     # Public: Appends a directory to Vim's runtimepath
@@ -157,7 +157,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit(filename)
-      command "edit #{filename_escape(filename)}"
+      command "edit #{escape_filename(filename)}"
       self
     end
 
@@ -167,7 +167,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit!(filename)
-      command "edit! #{filename_escape(filename)}"
+      command "edit! #{escape_filename(filename)}"
       self
     end
 
@@ -177,7 +177,7 @@ module Vimrunner
     # Returns the String output.
     # Raises InvalidCommandError if the command is not recognised by vim.
     def command(commands)
-      server.remote_expr("VimrunnerEvaluateCommandOutput('#{escape(commands)}')").tap do |output|
+      server.remote_expr("VimrunnerEvaluateCommandOutput('#{escape_single_quote(commands)}')").tap do |output|
         raise InvalidCommandError.new(output) if output =~ /^Vim:E\d+:/
       end
     end
@@ -187,15 +187,13 @@ module Vimrunner
       server.kill
     end
 
-    def filename_escape(name)
+    private
+
+    def escape_filename(name)
       name.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
     end
 
-
-
-    private
-
-    def escape(string)
+    def escape_single_quote(string)
       string.to_s.gsub("'", "''")
     end
   end

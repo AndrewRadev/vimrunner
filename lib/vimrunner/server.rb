@@ -16,7 +16,7 @@ module Vimrunner
   # A Client would be necessary as the actual interface, though it is possible
   # to use a Server directly to invoke --remote commands on its Vim instance.
   class Server
-    VIMRC = File.expand_path("../../../vim/vimrc", __FILE__)
+    VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
     VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
 
     attr_reader :name, :executable, :vimrc
@@ -75,8 +75,7 @@ module Vimrunner
 
       client = new_client
       client.source(VIMRUNNER_RC)
-
-      return client
+      client
     end
 
     # Public: Checks if the server is connected to a running Vim instance.

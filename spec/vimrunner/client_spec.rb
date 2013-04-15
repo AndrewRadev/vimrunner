@@ -23,6 +23,13 @@ module Vimrunner
       File.read('some_file').strip.should eq 'Contents of the file'
     end
 
+    it "properly escapes filenames" do
+      client.edit 'some file'
+      client.write
+
+      File.exists?('some file').should be_true
+    end
+
     it "can execute commands with a bang" do
       client.edit 'some_file'
       client.insert 'Contents of the file'
