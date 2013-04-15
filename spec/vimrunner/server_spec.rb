@@ -67,17 +67,17 @@ module Vimrunner
       end
     end
 
-    describe "#connected?" do
+    describe "#running?" do
       it "returns true if the server started successfully" do
         server.start
-        server.should be_connected
+        server.should be_running
       end
 
       it "returns true if the given name corresponds to a running Vim instance" do
         server.start
         other_server = Server.new(:name => server.name)
 
-        other_server.should be_connected
+        other_server.should be_running
       end
     end
 

@@ -13,7 +13,7 @@ module Vimrunner
   # an existing Vim instance, it can control that instance without the need to
   # start a new process.
   #
-  # A Client would be necessary as the actual interface, though it is possible
+  # A Client would be necessary as there's a ctual interface, though it is possible
   # to use a Server directly to invoke --remote commands on its Vim instance.
   class Server
     VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
@@ -68,7 +68,7 @@ module Vimrunner
     #
     # Returns a new Client instance initialized with this Server.
     def connect(options = {})
-      if !connected? && options[:spawn]
+      if !running? && options[:spawn]
         @r, @w, @pid = spawn
       end
       wait_until_started
@@ -78,10 +78,10 @@ module Vimrunner
       client
     end
 
-    # Public: Checks if the server is connected to a running Vim instance.
+    # Public: Checks if there's a running Vim instance with the server's name.
     #
     # Returns a Boolean
-    def connected?
+    def running?
       serverlist.include?(name)
     end
 
@@ -147,7 +147,7 @@ module Vimrunner
 
     def wait_until_started
       Timeout.timeout(5, TimeoutError) do
-        sleep 0.1 while !connected?
+        sleep 0.1 while !running?
       end
     end
   end
