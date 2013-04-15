@@ -25,6 +25,19 @@ module Vimrunner
       command("runtime #{entry_script}") if entry_script
     end
 
+    # Public: source a script in Vim server
+    #
+    # script - The Vim script to be sourced
+    #
+    # Examples
+    #
+    #   vim.source '/path/to/plugin/rails.vim'
+    #
+    # Returns nothing.
+    def source(script)
+      feedkeys(":\\<C-u>source #{filename_escape(script)}\\<CR>")
+    end
+
     # Public: Appends a directory to Vim's runtimepath
     #
     # dir - The directory added to the path
@@ -144,7 +157,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit(filename)
-      command "edit #{filename}"
+      command "edit #{filename_escape(filename)}"
       self
     end
 
@@ -154,7 +167,7 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit!(filename)
-      command "edit! #{filename}"
+      command "edit! #{filename_escape(filename)}"
       self
     end
 
@@ -173,6 +186,12 @@ module Vimrunner
     def kill
       server.kill
     end
+
+    def filename_escape(name)
+      name.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
+    end
+
+
 
     private
 

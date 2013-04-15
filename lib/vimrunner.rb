@@ -60,6 +60,6 @@ module Vimrunner
   #
   # Returns a Client for the named server.
   def self.connect(name)
-    Server.new(:name => name).connect
+    Server.new(:name => name).connect(:spawn => true)
   end
 end
