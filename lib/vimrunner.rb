@@ -49,7 +49,8 @@ module Vimrunner
     Server.new(:executable => Platform.gvim).start(&blk)
   end
 
-  # Public: Connect to an existing Vim process by name.
+  # Public: Connect to an existing Vim process by name. Returns nil in case of
+  # failure.
   #
   # name - The String name of the Vim server to connect to.
   #
@@ -60,6 +61,21 @@ module Vimrunner
   #
   # Returns a Client for the named server.
   def self.connect(name)
-    Server.new(:name => name).connect(:spawn => true)
+    Server.new(:name => name).connect
+  end
+
+  # Public: Connect to an existing Vim process by name. Raises an exception in
+  # case of failure.
+  #
+  # name - The String name of the Vim server to connect to.
+  #
+  # Examples
+  #
+  #   client = Vimrunner.connect("FOO")
+  #   # => #<Vimrunner::Client>
+  #
+  # Returns a Client for the named server.
+  def self.connect!(name)
+    Server.new(:name => name).connect!
   end
 end

@@ -28,6 +28,11 @@ module Vimrunner
     #                         (default: Platform.vim).
     #           :name       - The String name of the Vim server (optional)
     #                         (default: "VIMRUNNER#{rand}").
+    #           :vimrc      - The String vimrc file to source in the client (optional)
+    #                         (default: Server::VIMRC).
+    #           :foreground - Boolean, whether to start Vim with the -f option (optional)
+    #                         (default: true).
+    #
     def initialize(options = {})
       @executable = options.fetch(:executable) { Platform.vim }
       @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }
@@ -50,9 +55,10 @@ module Vimrunner
     # Yields a new Client instance initialized with this Server.
     def start
       @r, @w, @pid = spawn
+
       if block_given?
         begin
-          @result = yield(connect)
+          @result = yield(connect!)
         ensure
           @r.close
           @w.close
@@ -60,18 +66,39 @@ module Vimrunner
         end
         @result
       else
-        connect
+        connect!
       end
     end
 
     # Public: Connects to the running server by name, blocking if need be.
+    # Returns nil if no server was found in the given time.
+    #
+    # options - An optional Hash. For now, only used for specifying a timeout
+    #           (default: {}):
+    #
+    #           :timeout - The Integer timeout to wait for a running server (optional)
+    #                      (default: 5).
     #
     # Returns a new Client instance initialized with this Server.
     def connect(options = {})
-      if !running? && options[:spawn]
-        @r, @w, @pid = spawn
-      end
-      wait_until_started
+      connect!(options)
+    rescue TimeoutError
+      nil
+    end
+
+    # Public: Connects to the running server by name, blocking if need be.
+    # Raises a TimeoutError if no server was found in the given time in
+    # seconds.
+    #
+    # options - An optional Hash. For now, only used for specifying a timeout
+    #           (default: {}):
+    #
+    #           :timeout - The Integer timeout to wait for a running server
+    #                      (default: 5).
+    #
+    # Returns a new Client instance initialized with this Server.
+    def connect!(options = {})
+      wait_until_running(options[:timeout] || 5)
 
       client = new_client
       client.source(VIMRUNNER_RC)
@@ -145,8 +172,8 @@ module Vimrunner
       PTY.spawn("#{executable} #{foreground_option} --servername #{name} -u #{vimrc}")
     end
 
-    def wait_until_started
-      Timeout.timeout(5, TimeoutError) do
+    def wait_until_running(seconds)
+      Timeout.timeout(seconds, TimeoutError) do
         sleep 0.1 while !running?
       end
     end

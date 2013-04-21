@@ -51,7 +51,7 @@ module Vimrunner
       end
     end
 
-    describe "#connect" do
+    describe "connecting to an existing server" do
       before(:each) do
         server.start
       end
@@ -60,10 +60,28 @@ module Vimrunner
 
       it "returns a client" do
         second_server.connect.should be_a(Client)
+        second_server.connect!.should be_a(Client)
       end
 
       it "returns a client connected to the named server" do
         second_server.connect.server.should eq(second_server)
+        second_server.connect!.server.should eq(second_server)
+      end
+
+      describe "#connect" do
+        it "returns nil if no server is found in :timeout seconds" do
+          server = Server.new(:name => 'NONEXISTENT')
+          server.connect(:timeout => 0.1).should be_nil
+        end
+      end
+
+      describe "#connect!" do
+        it "raises an error if no server is found in :timeout seconds" do
+          server = Server.new(:name => 'NONEXISTENT')
+          expect {
+            server.connect!(:timeout => 0.1)
+          }.to raise_error(TimeoutError)
+        end
       end
     end
 

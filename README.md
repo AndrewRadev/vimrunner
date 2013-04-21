@@ -68,13 +68,23 @@ Vim instance, check out the [`Client`
 documentation](http://rubydoc.info/gems/vimrunner/Vimrunner/Client).
 
 If you already have a remote-capable Vim server running, you can connect
-Vimrunner to it directly by using `Vimrunner.connect` like so:
+Vimrunner to it directly by using `Vimrunner.connect` or `Vimrunner.connect!`
+like so:
 
 ```ruby
 # Assuming a running Vim server called FOO...
 vim = Vimrunner.connect("FOO")
+if vim
+  vim.insert("Hello world!")
+end
+
+# Or, if you're confident there's a running server...
+vim = Vimrunner.connect!("FOO")
 vim.insert("Hello world!")
 ```
+
+In case of failure to find the server `FOO`, the first form will return `nil`,
+while the second form will raise an exception.
 
 ## Testing
 
