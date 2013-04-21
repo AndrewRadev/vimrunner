@@ -88,31 +88,54 @@ while the second form will raise an exception.
 
 ## Testing
 
-If you're using Vimrunner for testing vim plugins, take a look at the
-documentation for the
-[Vimrunner::Testing](http://rubydoc.info/gems/vimrunner/Vimrunner/Testing)
-module. It contains a few simple helpers that may make it a bit easier to write
-regression tests in rspec. With them, it could work something like this:
+If you're using Vimrunner for testing vim plugins, a simple way to get up and
+running is by requiring the `vimrunner/rspec` file. With that, your
+`spec_helper.rb` would look like this:
+
+``` ruby
+require 'vimrunner'
+require 'vimrunner/rspec'
+
+Vimrunner::RSpec.configure do |config|
+  # Use a single Vim instance for the test suite. Set to false to use an
+  # instance per test (slower, but can be easier to manage).
+  config.reuse_server = true
+
+  # Decide how to start a Vim instance. In this block, an instance should be
+  # spawned and set up with anything project-specific.
+  config.start_vim do
+    vim = Vimrunner.start
+
+    # Or, start a GUI instance:
+    # vim = Vimrunner.start_gvim
+
+    # Setup your plugin in the Vim instance
+    plugin_path = File.expand_path('.')
+    vim.add_plugin(plugin_path, 'plugin/my_plugin.vim')
+
+    # The returned value is the Client available in the tests.
+    vim
+  end
+end
+```
+
+This will result in:
+
+- A `vim` helper in every rspec example, returning the configured
+  `Vimrunner::Client` instance.
+- Every example is executed in a separate temporary directory to make it easier
+  to manipulate files.
+- A few helper methods from the `Vimrunner::Testing` module
+  ([documentation](http://rubydoc.info/gems/vimrunner/Vimrunner/Testing)).
+
+The specs would then look something like this:
 
 ``` ruby
 require 'spec_helper'
-require 'vimrunner/testing'
 
 describe "My Vim plugin" do
-  let(:vim) { some_instance_of_vim }
-
-  around :each do |example|
-    # needed only once for any Vim instance:
-    vim.add_plugin(File.expand_path('../my_plugin_path'), 'plugin/my_plugin.vim')
-
-    # ensure a clean temporary directory for each test:
-    Vimrunner::Testing.tmpdir(vim) do
-      example.call
-    end
-  end
-
   specify "some behaviour" do
-    Vimrunner::Testing.write_file('test.rb', <<-EOF)
+    write_file('test.rb', <<-EOF)
       def foo
         bar
       end
@@ -122,7 +145,7 @@ describe "My Vim plugin" do
     do_plugin_related_stuff_with(vim)
     vim.write
 
-    IO.read('test.rb').should eq Vimrunner::Testing.normalize_string_indent(<<-EOF)
+    IO.read('test.rb').should eq normalize_string_indent(<<-EOF)
       def bar
         foo
       end
@@ -131,9 +154,8 @@ describe "My Vim plugin" do
 end
 ```
 
-It's possible to make this a lot more concise by including
-`Vimrunner::Testing`, by making your own helper methods that wrap common
-behaviour, by extracting some code to `spec_helper.rb`, and so on.
+If you need a different setup, please look through the file
+`lib/vimrunner/rspec.rb` for ideas on how to build your own testing scaffold.
 
 ## Requirements
 
