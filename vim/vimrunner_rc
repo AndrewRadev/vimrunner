@@ -1,5 +1,5 @@
 let has_error_handling_bugfix =
-      \ v:version >= 703 ||
+      \ v:version > 703 ||
       \ v:version == 703 && has('patch860')
 
 if has_error_handling_bugfix
