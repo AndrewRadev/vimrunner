@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name        = 'vimrunner'
   s.version     = Vimrunner::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ['Andrew Radev']
+  s.authors     = ['Andrew Radev', 'Paul Mucur']
   s.email       = ['andrey.radev@gmail.com']
   s.homepage    = 'http://github.com/AndrewRadev/vimrunner'
   s.summary     = 'Lets you control a Vim instance through Ruby'
