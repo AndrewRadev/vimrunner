@@ -187,11 +187,12 @@ module Vimrunner
       server.kill
     end
 
-    private
 
     def escape_filename(name)
       name.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
     end
+
+    private
 
     def escape_single_quote(string)
       string.to_s.gsub("'", "''")
