@@ -1,3 +1,6 @@
+require "vimrunner/path"
+require "vimrunner/command"
+
 module Vimrunner
   class Client
     attr_reader :server
@@ -22,7 +25,10 @@ module Vimrunner
     # Returns nothing.
     def add_plugin(dir, entry_script = nil)
       append_runtimepath(dir)
-      command("runtime #{entry_script}") if entry_script
+      if entry_script
+        entry_script_path = Path.new(entry_script)
+        command("runtime #{entry_script_path}")
+      end
     end
 
     # Public: source a script in Vim server
@@ -35,7 +41,8 @@ module Vimrunner
     #
     # Returns nothing.
     def source(script)
-      feedkeys(":\\<C-u>source #{escape_filename(script)}\\<CR>")
+      script_path = Path.new(script)
+      feedkeys(":\\<C-u>source #{script_path}\\<CR>")
     end
 
     # Public: Appends a directory to Vim's runtimepath
@@ -44,7 +51,8 @@ module Vimrunner
     #
     # Returns nothing.
     def append_runtimepath(dir)
-      command("set runtimepath+=#{dir}")
+      dir_path = Path.new(dir)
+      command("set runtimepath+=#{dir_path}")
     end
 
     # Public: Prepends a directory to Vim's runtimepath. Use this instead of
@@ -55,8 +63,9 @@ module Vimrunner
     #
     # Returns nothing.
     def prepend_runtimepath(dir)
-      runtimepath = echo '&runtimepath'
-      command("set runtimepath=#{dir},#{runtimepath}")
+      dir_path = Path.new(dir)
+      runtimepath = Path.new(echo('&runtimepath'))
+      command("set runtimepath=#{dir_path},#{runtimepath}")
     end
 
     # Public: Switches Vim to normal mode and types in the given keys.
@@ -157,7 +166,8 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit(filename)
-      command "edit #{escape_filename(filename)}"
+      file_path = Path.new(filename)
+      command "edit #{file_path}"
       self
     end
 
@@ -167,7 +177,8 @@ module Vimrunner
     #
     # Returns the Client instance.
     def edit!(filename)
-      command "edit! #{escape_filename(filename)}"
+      file_path = Path.new(filename)
+      command "edit! #{file_path}"
       self
     end
 
@@ -177,7 +188,8 @@ module Vimrunner
     # Returns the String output.
     # Raises InvalidCommandError if the command is not recognised by vim.
     def command(commands)
-      server.remote_expr("VimrunnerEvaluateCommandOutput('#{escape_single_quote(commands)}')").tap do |output|
+      command = Command.new(commands)
+      server.remote_expr("VimrunnerEvaluateCommandOutput('#{command}')").tap do |output|
         raise InvalidCommandError.new(output) if output =~ /^Vim:E\d+:/
       end
     end
@@ -185,17 +197,6 @@ module Vimrunner
     # Kills the server it's connected to.
     def kill
       server.kill
-    end
-
-
-    def escape_filename(name)
-      name.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
-    end
-
-    private
-
-    def escape_single_quote(string)
-      string.to_s.gsub("'", "''")
     end
   end
 end
