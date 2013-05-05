@@ -24,6 +24,7 @@ else
   function! VimrunnerEvaluateCommandOutput(command)
     let base_command = split(a:command, '\s\+')[0]
     let base_command = substitute(base_command, '!$', '', '')
+    let base_command = substitute(base_command, '^\d\+', '', '')
 
     if !exists(':'.base_command)
       let output = 'Vim:E492: Not an editor command: '.base_command
