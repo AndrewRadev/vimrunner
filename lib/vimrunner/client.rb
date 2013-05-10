@@ -198,5 +198,12 @@ module Vimrunner
     def kill
       server.kill
     end
+
+    # Bring the server to foreground
+    def foreground
+      server.remote_expr("foreground()")
+    end
+
+
   end
 end
