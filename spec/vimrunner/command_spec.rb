@@ -9,9 +9,5 @@ module Vimrunner
     it "escapes single quotes" do
       Command.new("echo 'foo'").to_s.should eq("echo ''foo''")
     end
-
-    it "acts mostly as a string" do
-      ("one " + Command.new("two")).should eq('one two')
-    end
   end
 end
