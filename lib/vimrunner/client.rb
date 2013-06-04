@@ -203,7 +203,5 @@ module Vimrunner
     def foreground
       server.remote_expr("foreground()")
     end
-
-
   end
 end

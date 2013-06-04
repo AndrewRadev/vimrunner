@@ -110,7 +110,7 @@ Vimrunner::RSpec.configure do |config|
     # vim = Vimrunner.start_gvim
 
     # Setup your plugin in the Vim instance
-    plugin_path = File.expand_path('.')
+    plugin_path = File.expand_path('../..', __FILE__)
     vim.add_plugin(plugin_path, 'plugin/my_plugin.vim')
 
     # The returned value is the Client available in the tests.
