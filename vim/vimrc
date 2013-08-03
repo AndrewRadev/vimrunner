@@ -9,5 +9,3 @@ set noswapfile nobackup
 " remove default ~/.vim directories to avoid loading plugins
 set runtimepath-=~/.vim
 set runtimepath-=~/.vim/after
-
-execute "source " . expand('<sfile>:p:h') . "/vimrunner_rc"
