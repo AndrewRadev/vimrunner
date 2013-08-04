@@ -169,7 +169,9 @@ module Vimrunner
     end
 
     def spawn
-      PTY.spawn("#{executable} #{foreground_option} --servername #{name} -u #{vimrc}")
+      PTY.spawn(executable, *%W[
+        #{foreground_option} --servername #{name} -u #{vimrc}
+      ])
     end
 
     def wait_until_running(seconds)
