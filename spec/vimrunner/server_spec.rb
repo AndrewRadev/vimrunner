@@ -14,6 +14,11 @@ module Vimrunner
       it "defaults to a random name" do
         server.name.should start_with("VIMRUNNER")
       end
+
+      it "ensures that its server name is uppercase" do
+        server = Vimrunner::Server.new(:name => "foo")
+        server.name.should eq("FOO")
+      end
     end
 
     describe "#start" do
