@@ -19,7 +19,7 @@ module Vimrunner
     VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
     VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
 
-    attr_reader :name, :executable, :vimrc
+    attr_reader :name, :executable, :vimrc, :gvimrc
 
     # Public: Initialize a Server
     #
@@ -37,6 +37,7 @@ module Vimrunner
       @executable = options.fetch(:executable) { Platform.vim }
       @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }.upcase
       @vimrc      = options.fetch(:vimrc) { VIMRC }
+      @gvimrc     = options.fetch(:gvimrc) { "NONE" }
       @foreground = options.fetch(:foreground, true)
     end
 
@@ -169,7 +170,9 @@ module Vimrunner
     end
 
     def spawn
-      PTY.spawn("#{executable} #{foreground_option} --servername #{name} -u #{vimrc}")
+      PTY.spawn(executable, *%W[
+        #{foreground_option} --servername #{name} -u #{vimrc} -U #{gvimrc}
+      ])
     end
 
     def wait_until_running(seconds)
