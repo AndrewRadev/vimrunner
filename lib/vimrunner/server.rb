@@ -35,7 +35,7 @@ module Vimrunner
     #
     def initialize(options = {})
       @executable = options.fetch(:executable) { Platform.vim }
-      @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }
+      @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }.upcase
       @vimrc      = options.fetch(:vimrc) { VIMRC }
       @foreground = options.fetch(:foreground, true)
     end
