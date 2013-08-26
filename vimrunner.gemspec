@@ -14,6 +14,8 @@ Gem::Specification.new do |s|
     party trick, this can be used to integration test Vim script.
   D
 
+  s.add_dependency 'childprocess'
+
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rdoc'
   s.add_development_dependency 'simplecov'

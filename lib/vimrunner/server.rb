@@ -1,5 +1,5 @@
 require "timeout"
-require "pty"
+require "childprocess"
 
 require "vimrunner/errors"
 require "vimrunner/client"
@@ -55,15 +55,16 @@ module Vimrunner
     # Returns a new Client instance initialized with this Server.
     # Yields a new Client instance initialized with this Server.
     def start
-      @r, @w, @pid = spawn
+      @process = spawn
 
       if block_given?
         begin
           @result = yield(connect!)
         ensure
-          @r.close
-          @w.close
-          Process.kill(9, @pid) rescue Errno::ESRCH
+          @process.stop
+          # @r.close
+          # @w.close
+          # Process.kill(9, @pid) rescue Errno::ESRCH
         end
         @result
       else
@@ -117,9 +118,10 @@ module Vimrunner
     #
     # Returns self.
     def kill
-      @r.close
-      @w.close
-      Process.kill(9, @pid) rescue Errno::ESRCH
+      @process.stop
+      # @r.close
+      # @w.close
+      # Process.kill(9, @pid) rescue Errno::ESRCH
 
       self
     end
@@ -170,9 +172,11 @@ module Vimrunner
     end
 
     def spawn
-      PTY.spawn(executable, *%W[
+      process = ChildProcess.build(executable, *%W[
         #{foreground_option} --servername #{name} -u #{vimrc} -U #{gvimrc}
       ])
+      process.start
+      process
     end
 
     def wait_until_running(seconds)
