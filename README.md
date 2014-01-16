@@ -67,7 +67,7 @@ examples.)
 
 Calling `start` (or `start_gvim`) will return a `Client` instance with which
 you can control Vim. For a full list of methods you can invoke on the remote
-Vim instance, check out the [`Client`
+Vim instance, check out the [Client
 documentation](http://rubydoc.info/gems/vimrunner/Vimrunner/Client).
 
 If you already have a remote-capable Vim server running, you can connect
