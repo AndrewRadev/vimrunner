@@ -13,7 +13,7 @@ module Vimrunner
   # an existing Vim instance, it can control that instance without the need to
   # start a new process.
   #
-  # A Client would be necessary as there's a ctual interface, though it is possible
+  # A Client would be necessary as an actual interface, though it is possible
   # to use a Server directly to invoke --remote commands on its Vim instance.
   class Server
     VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
@@ -150,7 +150,7 @@ module Vimrunner
     end
 
     # Public: Sends the given keys
-    # A wrapper around --remote-expr.
+    # A wrapper around --remote-send.
     #
     # keys - a String with a sequence of Vim-compatible keystrokes.
     #
