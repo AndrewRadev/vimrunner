@@ -190,7 +190,7 @@ module Vimrunner
     def command(commands)
       command = Command.new(commands)
       server.remote_expr("VimrunnerEvaluateCommandOutput('#{command}')").tap do |output|
-        raise InvalidCommandError.new(output) if output =~ /^Vim:E\d+:/
+        raise InvalidCommandError.new(output) if output =~ /^Vim(\(call\))?:E\d+:/
       end
     end
 
