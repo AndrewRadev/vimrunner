@@ -61,9 +61,7 @@ module Vimrunner
         begin
           @result = yield(connect!)
         ensure
-          @r.close
-          @w.close
-          Process.kill(9, @pid) rescue Errno::ESRCH
+          kill
         end
         @result
       else
@@ -119,7 +117,11 @@ module Vimrunner
     def kill
       @r.close
       @w.close
-      Process.kill(9, @pid) rescue Errno::ESRCH
+
+      begin
+        Process.kill(9, @pid)
+      rescue Errno::ESRCH
+      end
 
       self
     end
