@@ -1,12 +1,4 @@
-require "timeout"
-require "pty"
-
-require "vimrunner/errors"
-require "vimrunner/client"
-require "vimrunner/platform"
-
 module Vimrunner
-
   # Public: A Server has the responsibility of starting a Vim process and
   # communicating with it through the clientserver interface. The process can
   # be started with "start" and stopped with "kill". If given the servername of
@@ -61,9 +53,7 @@ module Vimrunner
         begin
           @result = yield(connect!)
         ensure
-          @r.close
-          @w.close
-          Process.kill(9, @pid) rescue Errno::ESRCH
+          kill
         end
         @result
       else
@@ -119,7 +109,11 @@ module Vimrunner
     def kill
       @r.close
       @w.close
-      Process.kill(9, @pid) rescue Errno::ESRCH
+
+      begin
+        Process.kill(9, @pid)
+      rescue Errno::ESRCH
+      end
 
       self
     end

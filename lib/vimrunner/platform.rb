@@ -1,9 +1,4 @@
-require "rbconfig"
-
-require "vimrunner/errors"
-
 module Vimrunner
-
   # Public: The Platform module contains logic for finding a Vim executable
   # that supports the clientserver functionality on the current system. Its
   # methods can be used to fetch a Vim path for initializing a Server.

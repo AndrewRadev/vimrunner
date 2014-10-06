@@ -1,13 +1,11 @@
 require "tmpdir"
 require "simplecov"
-
+require "pry"
 SimpleCov.start
-
 RSpec.configure do |config|
   def write_file(filename, contents)
     dirname = File.dirname(filename)
     FileUtils.mkdir_p dirname if not File.directory?(dirname)
-
     File.open(filename, 'w') { |f| f.write(contents) }
   end
 

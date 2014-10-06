@@ -1,7 +1,6 @@
 require "spec_helper"
 require "vimrunner"
 require "vimrunner/errors"
-
 module Vimrunner
   describe NoSuitableVimError do
     it "has a useful message" do

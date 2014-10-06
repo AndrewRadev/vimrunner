@@ -4,3 +4,7 @@ pkg/*
 doc/*
 tmp/*
 coverage/*
+
+# ignore custom file
+NOTES.md
+.ruby-version
