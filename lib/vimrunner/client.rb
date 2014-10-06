@@ -1,6 +1,3 @@
-require "vimrunner/path"
-require "vimrunner/command"
-
 module Vimrunner
   class Client
     attr_reader :server

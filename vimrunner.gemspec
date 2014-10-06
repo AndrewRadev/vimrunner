@@ -17,7 +17,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rdoc'
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'rspec', '~> 2.13.0'
+  s.add_development_dependency 'rspec', '~> 3.1.0'
+  s.add_development_dependency 'pry', '~> 0.10.1'
+  s.add_development_dependency 'pry-byebug', '~> 2.0.0' if RUBY_VERSION >= '2.0.0'
 
   s.required_rubygems_version = '>= 1.3.6'
   s.rubyforge_project         = 'vimrunner'

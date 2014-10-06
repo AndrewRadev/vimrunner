@@ -1,11 +1,7 @@
-require 'tmpdir'
-
 module Vimrunner
-
   # Public: Provides some utility helpers to assist in using Vimrunner for
   # testing purposes.
   module Testing
-
     # Public: Writes the given string to the file identified by "filename".
     #
     # Uses #normalize_string_indent to ensure consistent indentation when given
