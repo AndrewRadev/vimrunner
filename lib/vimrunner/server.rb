@@ -1,10 +1,3 @@
-require "timeout"
-require "pty"
-
-require "vimrunner/errors"
-require "vimrunner/client"
-require "vimrunner/platform"
-
 module Vimrunner
 
   # Public: A Server has the responsibility of starting a Vim process and

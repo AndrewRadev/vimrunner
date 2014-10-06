@@ -1,6 +1,3 @@
-require 'vimrunner'
-require 'vimrunner/testing'
-
 module Vimrunner
   module RSpec
     class Configuration
@@ -41,10 +38,8 @@ Vimrunner::RSpec.configure do |config|
 end
 
 RSpec.configure do |config|
-
   # Include the Testing DSL into all examples.
   config.include(Vimrunner::Testing)
-
   # Each example is executed in a separate directory
   config.around(:each) do |example|
     Dir.mktmpdir do |dir|
