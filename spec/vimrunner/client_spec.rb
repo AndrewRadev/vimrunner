@@ -2,7 +2,7 @@ require "spec_helper"
 require "vimrunner"
 
 module Vimrunner
-  describe Client do
+  RSpec.describe Client do
     let!(:client) { Vimrunner.start }
 
     after :each do
@@ -11,7 +11,7 @@ module Vimrunner
 
     it "is instantiated in the current directory" do
       cwd = FileUtils.getwd
-      client.command(:pwd).should eq cwd
+      expect(client.command(:pwd)).to eq(cwd)
     end
 
     it "can write a file through Vim" do
@@ -19,15 +19,15 @@ module Vimrunner
       client.insert 'Contents of the file'
       client.write
 
-      File.exists?('some_file').should be_true
-      File.read('some_file').strip.should eq 'Contents of the file'
+      expect(File.exists?('some_file')).to eq(true)
+      expect(File.read('some_file').strip).to eq('Contents of the file')
     end
 
     it "properly escapes filenames" do
       client.edit 'some file'
       client.write
 
-      File.exists?('some file').should be_true
+      expect(File.exists?('some file')).to eq(true)
     end
 
     it "can execute commands with a bang" do
@@ -37,23 +37,23 @@ module Vimrunner
       client.insert 'Contents of the other file'
       client.command :write
 
-      File.exists?('some_file').should be_false
-      File.exists?('some_other_file').should be_true
-      File.read('some_other_file').strip.should eq 'Contents of the other file'
+      expect(File.exists?('some_file')).to eq(false)
+      expect(File.exists?('some_other_file')).to eq(true)
+      expect(File.read('some_other_file').strip).to eq('Contents of the other file')
     end
 
     it "can add a plugin for Vim to use" do
       write_file 'example/plugin/test.vim', 'command Okay echo "OK"'
       client.add_plugin('example', 'plugin/test.vim')
 
-      client.command('Okay').should eq 'OK'
+      expect(client.command('Okay')).to eq('OK')
     end
 
     it "can append a directory to Vim's runtimepath" do
       write_file 'example/test.vim', 'echo "OK"'
       client.append_runtimepath('example')
 
-      client.command('runtime test.vim').should eq 'OK'
+      expect(client.command('runtime test.vim')).to eq('OK')
     end
 
     it "can prepend a directory to Vim's runtimepath, giving it priority" do
@@ -62,33 +62,33 @@ module Vimrunner
       client.append_runtimepath('example_first')
       client.prepend_runtimepath('example_second')
 
-      client.command('runtime test.vim').should eq 'second'
+      expect(client.command('runtime test.vim')).to eq('second')
     end
 
     it "can chain several operations" do
       client.edit('some_file').insert('Contents').write
-      File.exists?('some_file').should be_true
-      File.read('some_file').strip.should eq 'Contents'
+      expect(File.exists?('some_file')).to eq(true)
+      expect(File.read('some_file').strip).to eq('Contents')
     end
 
     describe "#set" do
       it "activates a boolean setting" do
         client.set 'expandtab'
-        client.command('echo &expandtab').should eq '1'
+        expect(client.command('echo &expandtab')).to eq('1')
 
         client.set 'noexpandtab'
-        client.command('echo &expandtab').should eq '0'
+        expect(client.command('echo &expandtab')).to eq('0')
       end
 
       it "sets a setting to a given value" do
         client.set 'tabstop', 3
-        client.command('echo &tabstop').should eq '3'
+        expect(client.command('echo &tabstop')).to eq('3')
       end
 
       it "can be chained" do
         client.set('expandtab').set('tabstop', 3)
-        client.command('echo &expandtab').should eq '1'
-        client.command('echo &tabstop').should eq '3'
+        expect(client.command('echo &expandtab')).to eq('1')
+        expect(client.command('echo &tabstop')).to eq('3')
       end
     end
 
@@ -104,7 +104,7 @@ module Vimrunner
 
         client.write
 
-        File.read('some_file').strip.should eq 'one'
+        expect(File.read('some_file').strip).to eq('one')
       end
 
       it "can be chained" do
@@ -113,18 +113,18 @@ module Vimrunner
 
         client.write
 
-        File.read('some_file').strip.should eq 'two'
+        expect(File.read('some_file').strip).to eq('two')
       end
     end
 
     describe "#echo" do
       it "returns the result of a given expression" do
-        client.echo('"foo"').should eq 'foo'
+        expect(client.echo('"foo"')).to eq('foo')
       end
 
       it "returns the result of multiple expressions" do
         client.command('let b:foo = "bar"')
-        client.echo('"foo"', 'b:foo').should eq 'foo bar'
+        expect(client.echo('"foo"', 'b:foo')).to eq('foo bar')
       end
     end
 
@@ -137,24 +137,24 @@ module Vimrunner
       it "sends keys as if they come from a mapping or user" do
         client.feedkeys('\<C-R>')
         client.write
-        File.read('some_file').strip.should eq 'hello'
+        expect(File.read('some_file').strip).to eq('hello')
       end
 
       it "handles quotes" do
         client.feedkeys('\<C-R>\'"')
         client.write
-        File.read('some_file').strip.should eq 'hello\'"'
+        expect(File.read('some_file').strip).to eq('hello\'"')
       end
     end
 
     describe "#command" do
       it "returns the output of a Vim command" do
-        client.command(:version).should include '+clientserver'
-        client.command('echo "foo"').should eq 'foo'
+        expect(client.command(:version)).to include('+clientserver')
+        expect(client.command('echo "foo"')).to eq('foo')
       end
 
       it "allows single quotes in the command" do
-        client.command("echo 'foo'").should eq 'foo'
+        expect(client.command("echo 'foo'")).to eq('foo')
       end
 
       it "raises an error for a non-existent Vim command" do
