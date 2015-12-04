@@ -43,7 +43,7 @@ module Vimrunner
       if windows?
         the_exec = "gvim.exe"
       else
-        the_exec = executable
+        the_exec = vim
       end
       return the_exec
     end
