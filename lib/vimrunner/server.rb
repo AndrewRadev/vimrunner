@@ -138,7 +138,7 @@ module Vimrunner
     #
     # Returns an Array of String server names currently running.
     def serverlist
-      execute([executable, "--serverlist"]).split("\n")
+      execute([executable, "--serverlist"]).split(/\r?\n/)
     end
 
     # Public: Evaluates an expression in the Vim server and returns the result.
@@ -172,8 +172,9 @@ module Vimrunner
     end
 
     def spawn
-      PTY.spawn(executable, *%W[
-        #{foreground_option} --servername #{name} -u #{vimrc} -U #{gvimrc}
+      the_exec = Platform.spawn_executable
+      PTY.spawn(the_exec, *%W[
+        #{foreground_option} --servername #{name} -u #{Platform.fix_path vimrc} -U #{gvimrc}
       ])
     end
 

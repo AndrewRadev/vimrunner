@@ -34,6 +34,20 @@ module Vimrunner
       gvims.find { |gvim| suitable?(gvim) } or raise NoSuitableVimError
     end
 
+    def fix_path(path)
+      return `cygpath -ml "#{path}"`.chomp if need_to_fix_path?
+        return path
+    end
+
+    def spawn_executable
+      if windows?
+        the_exec = "gvim.exe"
+      else
+        the_exec = executable
+      end
+      return the_exec
+    end
+
     private
 
     def gvims
@@ -48,14 +62,22 @@ module Vimrunner
       %w( vim ) + gvims
     end
 
+    @need_to_fix_path = false
     def suitable?(vim)
       features = features(vim)
 
+      @need_to_fix_path = ! features.include?("cygwin") && cygwin?
       if gui?(vim)
+        features.include?("+clientserver")
+      elsif cygwin?
         features.include?("+clientserver")
       else
         features.include?("+clientserver") && features.include?("+xterm_clipboard")
       end
+    end
+
+    def need_to_fix_path?()
+      @need_to_fix_path
     end
 
     def gui?(vim)
@@ -73,5 +95,14 @@ module Vimrunner
     def mac?
       RbConfig::CONFIG["host_os"] =~ /darwin/
     end
+
+    def cygwin?
+      RbConfig::CONFIG["host_os"] == "cygwin"
+    end
+
+    def windows?
+      RbConfig::CONFIG["host_os"] =~ /mswin|cygwin/
+    end
+
   end
 end

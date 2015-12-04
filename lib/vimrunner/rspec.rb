@@ -46,11 +46,16 @@ RSpec.configure do |config|
   config.include(Vimrunner::Testing)
 
   # Each example is executed in a separate directory
+  # No trace shall be left in the tmp directory otherwise cygwin won't permit
+  # rmdir => vim is outside the directory at the end
+  # TODO: ensure a cd(pwd) à la RAII
+  pwd = Dir.pwd
   config.around(:each) do |example|
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        vim.command("cd #{dir}")
+        vim.cd(dir)
         example.run
+        vim.cd(pwd)
       end
     end
   end
