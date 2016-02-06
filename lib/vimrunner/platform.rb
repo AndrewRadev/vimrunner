@@ -37,15 +37,15 @@ module Vimrunner
     private
 
     def gvims
-      if mac?
-        %w( mvim gvim )
-      else
-        %w( gvim )
-      end
+      vims.select { |v| gui?(v) }
     end
 
     def vims
-      %w( vim ) + gvims
+      if mac?
+        ["vim", "mvim -v", "mvim", "gvim"]
+      else
+        ["vim", "gvim"]
+      end
     end
 
     def suitable?(vim)
@@ -61,11 +61,17 @@ module Vimrunner
     def gui?(vim)
       executable = File.basename(vim)
 
-      executable[0, 1] == "g" || executable[0, 1] == "m"
+      gvim_or_mvim_without_shell_switch?(executable)
+    end
+
+    def gvim_or_mvim_without_shell_switch?(executable)
+      executable.include?("gvim") || (
+        executable.include?("mvim") && executable !~ / -v\b/
+      )
     end
 
     def features(vim)
-      IO.popen([vim, "--version"]) { |io| io.read.strip }
+      `#{vim} --version` || ""
     rescue Errno::ENOENT
       ""
     end

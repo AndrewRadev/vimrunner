@@ -41,8 +41,8 @@ Vimrunner will attempt to start up the most suitable version of Vim available,
 meaning one of the following:
 
 * `vim` if it supports headlessly creating servers (see [Requirements](#requirements) below for more information);
-* `mvim` if you are on Mac OS X;
-* `gvim`.
+* `gvim`;
+* `mvim -v` (headless), or `mvim` if you are on Mac OS X.
 
 If you wish to always start a GUI Vim (viz. skip using a headless `vim`) then
 you can use `start_gvim` like so:
