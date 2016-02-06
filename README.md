@@ -42,7 +42,8 @@ meaning one of the following:
 
 * `vim` if it supports headlessly creating servers (see [Requirements](#requirements) below for more information);
 * `gvim`;
-* `mvim -v` (headless), or `mvim` if you are on Mac OS X.
+* `mvim -v` (headless), or `mvim` if you are on Mac OS X;
+* `alias vim` specified in your `~/.profile`, `~/.bash_profile`, or `~/.bashrc` (headless, or not).
 
 If you wish to always start a GUI Vim (viz. skip using a headless `vim`) then
 you can use `start_gvim` like so:

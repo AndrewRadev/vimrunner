@@ -45,7 +45,19 @@ module Vimrunner
         ["vim", "mvim -v", "mvim", "gvim"]
       else
         ["vim", "gvim"]
-      end
+      end + shell_aliases
+    end
+
+    def shell_aliases
+      [shell_vim_alias, shell_vim_alias_without_args]
+    end
+
+    def shell_vim_alias
+      `source ~/.profile; source ~/.bash_profile; source ~/.bashrc; alias vim`[/'(.+)'/, 1]
+    end
+
+    def shell_vim_alias_without_args
+      shell_vim_alias && shell_vim_alias[/^[^ ]+/]
     end
 
     def suitable?(vim)
@@ -59,9 +71,11 @@ module Vimrunner
     end
 
     def gui?(vim)
-      executable = File.basename(vim)
+      if vim
+        executable = File.basename(vim)
 
-      gvim_or_mvim_without_shell_switch?(executable)
+        gvim_or_mvim_without_shell_switch?(executable)
+      end
     end
 
     def gvim_or_mvim_without_shell_switch?(executable)
