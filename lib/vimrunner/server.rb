@@ -168,7 +168,7 @@ module Vimrunner
     end
 
     def execute(command)
-      IO.popen(command) { |io| io.read.strip }
+      IO.popen(command) { |io| io.read.chomp }
     end
 
     def spawn

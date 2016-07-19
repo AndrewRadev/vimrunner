@@ -162,6 +162,10 @@ module Vimrunner
           client.command(:nonexistent)
         }.to raise_error(InvalidCommandError)
       end
+
+      it "maintains whitespace in the output" do
+        client.command('echo "  foo  "').should eq '  foo  '
+      end
     end
   end
 end
