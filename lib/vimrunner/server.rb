@@ -168,7 +168,7 @@ module Vimrunner
     end
 
     def execute(command)
-      IO.popen(command) { |io| io.read.chomp }
+      IO.popen(command) { |io| io.read.chomp.gsub(/\A\n/, '') }
     end
 
     def spawn
