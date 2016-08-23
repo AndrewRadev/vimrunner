@@ -1,5 +1,6 @@
 require "vimrunner/path"
 require "vimrunner/command"
+require "vimrunner/platform"
 
 module Vimrunner
   class Client
@@ -26,8 +27,7 @@ module Vimrunner
     def add_plugin(dir, entry_script = nil)
       append_runtimepath(dir)
       if entry_script
-        entry_script_path = Path.new(entry_script)
-        command("runtime #{entry_script_path}")
+          runtime(entry_script)
       end
     end
 
@@ -41,8 +41,25 @@ module Vimrunner
     #
     # Returns nothing.
     def source(script)
+      script_path = Path.new(Platform.fix_path(script))
+      normal(":source #{script_path}<cr>")
+      # feedkeys doesn't seem to wait long enough
+      # feedkeys(":\\<C-u>source #{script_path}\\<CR>")
+    end
+
+    # Public: source a script in Vim server
+    #
+    # script - The Vim script to be sourced. The path is relative to
+    # &rtp.
+    #
+    # Examples
+    #
+    #   vim.runtime 'plugin/rails.vim'
+    #
+    # Returns nothing.
+    def runtime(script)
       script_path = Path.new(script)
-      feedkeys(":\\<C-u>source #{script_path}\\<CR>")
+      command("runtime #{script_path}")
     end
 
     # Public: Appends a directory to Vim's runtimepath
@@ -51,7 +68,7 @@ module Vimrunner
     #
     # Returns nothing.
     def append_runtimepath(dir)
-      dir_path = Path.new(dir)
+      dir_path = Path.new(Platform.fix_path(dir))
       command("set runtimepath+=#{dir_path}")
     end
 
@@ -63,7 +80,7 @@ module Vimrunner
     #
     # Returns nothing.
     def prepend_runtimepath(dir)
-      dir_path = Path.new(dir)
+      dir_path = Path.new(Platform.fix_path(dir))
       runtimepath = Path.new(echo('&runtimepath'))
       command("set runtimepath=#{dir_path},#{runtimepath}")
     end
@@ -180,6 +197,16 @@ module Vimrunner
       file_path = Path.new(filename)
       command "edit! #{file_path}"
       self
+    end
+
+    # Public: Changes the current directory
+    #
+    # The +path+ will be fixed on the fly
+    #
+    # Returns the String output.
+    def cd(path)
+        path = Platform.fix_path(path)
+        command("cd #{path}")
     end
 
     # Public: Executes the given command in the Vim instance and returns its

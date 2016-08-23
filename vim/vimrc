@@ -7,5 +7,7 @@ syntax on
 set noswapfile nobackup
 
 " remove default ~/.vim directories to avoid loading plugins
+set runtimepath-=~/vimfiles
+set runtimepath-=~/vimfiles/after
 set runtimepath-=~/.vim
 set runtimepath-=~/.vim/after

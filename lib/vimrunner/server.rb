@@ -19,13 +19,15 @@ module Vimrunner
     VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
     VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
 
-    attr_reader :name, :executable, :vimrc, :gvimrc
+    attr_reader :name, :executable, :spawn_executable, :vimrc, :gvimrc
 
     # Public: Initialize a Server
     #
     # options - The Hash options used to define a server (default: {}):
     #           :executable - The String Vim executable to use (optional)
     #                         (default: Platform.vim).
+    #           :spawn_executable - The String Vim spawn executable to use (optional)
+    #                               (default: Platform.spawn_executable).
     #           :name       - The String name of the Vim server (optional)
     #                         (default: "VIMRUNNER#{rand}").
     #           :vimrc      - The String vimrc file to source in the client (optional)
@@ -35,6 +37,7 @@ module Vimrunner
     #
     def initialize(options = {})
       @executable = options.fetch(:executable) { Platform.vim }
+      @spawn_executable = options.fetch(:spawn_executable) { Platform.spawn_executable }
       @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }.upcase
       @vimrc      = options.fetch(:vimrc) { VIMRC }
       @gvimrc     = options.fetch(:gvimrc) { "NONE" }
@@ -138,7 +141,7 @@ module Vimrunner
     #
     # Returns an Array of String server names currently running.
     def serverlist
-      execute([executable, "--serverlist"]).split("\n")
+      execute([executable, "--serverlist"]).split(/\r?\n/)
     end
 
     # Public: Evaluates an expression in the Vim server and returns the result.
@@ -172,8 +175,10 @@ module Vimrunner
     end
 
     def spawn
-      PTY.spawn(executable, *%W[
-        #{foreground_option} --servername #{name} -u #{vimrc} -U #{gvimrc}
+      the_exec = spawn_executable
+      # pp (%W[ #{the_exec} #{foreground_option} --servername #{name} -u #{vimrc} -U #{gvimrc} ])
+      PTY.spawn(the_exec, *%W[
+        #{foreground_option} --servername #{name} -u #{Platform.fix_path vimrc} -U #{gvimrc}
       ])
     end
 
