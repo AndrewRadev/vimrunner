@@ -19,7 +19,7 @@ module Vimrunner
     VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
     VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
 
-    attr_reader :name, :executable, :vimrc, :gvimrc
+    attr_reader :name, :executable, :vimrc, :gvimrc, :pid
 
     # Public: Initialize a Server
     #
