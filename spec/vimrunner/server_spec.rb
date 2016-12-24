@@ -148,5 +148,12 @@ module Vimrunner
         expect(server.serverlist).to eq(["VIM", "VIM2"])
       end
     end
+
+    describe "pid" do
+      it "returns the pid of the server" do
+        server.start
+        expect(server.pid).not_to be(nil)
+      end
+    end
   end
 end
