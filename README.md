@@ -9,8 +9,7 @@ integration testing on Vimscript.
 The latest stable documentation can be found
 [on rubydoc.info](http://rubydoc.info/gems/vimrunner/frames).
 
-This is still fairly experimental, so use with caution. Any issue reports or
-contributions are very welcome on the
+Any issue reports or contributions are very welcome on the
 [GitHub issue tracker](https://github.com/AndrewRadev/Vimrunner/issues).
 
 ## Usage
