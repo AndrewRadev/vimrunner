@@ -1,11 +1,12 @@
 module Vimrunner
-  class Path
+  class Path < ::String
     def initialize(path)
-      @path = path
+      super
     end
 
     def to_s
-      @path.to_s.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
+      super.to_s.gsub(/([^A-Za-z0-9_\-.,:\/@\n])/, "\\\\\\1")
     end
   end
 end
+
