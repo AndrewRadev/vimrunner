@@ -173,7 +173,12 @@ module Vimrunner
 
     def spawn
       PTY.spawn(executable, *%W[
-        #{foreground_option} --servername #{name} -u #{vimrc} -U #{gvimrc}
+        #{foreground_option}
+        --servername #{name}
+        -u #{vimrc}
+        -U #{gvimrc}
+        -i NONE
+        --noplugin
       ])
     end
 
