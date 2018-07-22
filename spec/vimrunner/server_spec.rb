@@ -122,6 +122,13 @@ module Vimrunner
 
         server.remote_expr("version")
       end
+
+      it "fails with a ExecutionError if the executable writes anything to stderr" do
+        expect(server).to receive(:name).and_return('WRONG_NAME')
+        expect {
+          server.remote_expr("version")
+        }.to raise_error(ExecutionError, /E247:/)
+      end
     end
 
     describe "#remote_send" do
@@ -131,6 +138,13 @@ module Vimrunner
                "--remote-send", "ihello"])
 
         server.remote_send("ihello")
+      end
+
+      it "fails with a ExecutionError if the executable writes anything to stderr" do
+        expect(server).to receive(:name).and_return('WRONG_NAME')
+        expect {
+          server.remote_send("ihello")
+        }.to raise_error(ExecutionError, /E247:/)
       end
     end
 

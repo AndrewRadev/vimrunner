@@ -1,5 +1,6 @@
 require "timeout"
 require "pty"
+require "open3"
 
 require "vimrunner/errors"
 require "vimrunner/client"
@@ -168,7 +169,12 @@ module Vimrunner
     end
 
     def execute(command)
-      IO.popen(command) { |io| io.read.chomp.gsub(/\A\n/, '') }
+      out, err, status = Open3.capture3(*command)
+      if not err.empty?
+        raise ExecutionError.new("Command failed (#{command}), output: #{err}")
+      end
+
+      out.chomp.gsub(/\A\n/, '')
     end
 
     def spawn

@@ -1,5 +1,6 @@
 module Vimrunner
   class InvalidCommandError < RuntimeError; end
+  class ExecutionError < RuntimeError; end
 
   class NoSuitableVimError < RuntimeError
     def message
