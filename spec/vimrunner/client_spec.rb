@@ -164,7 +164,7 @@ module Vimrunner
       end
 
       it "maintains whitespace in the output" do
-        client.command('echo "  foo  "').should eq '  foo  '
+        expect(client.command('echo "  foo  "')).to eq '  foo  '
       end
     end
   end
