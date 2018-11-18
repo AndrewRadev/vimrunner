@@ -56,7 +56,7 @@ If you require an even more specific version of Vim, you can pass the path to
 it by instantiating your own `Server` instance like so:
 
 ```ruby
-Vimrunner::Server.new("/path/to/my/specific/vim").start do |vim|
+Vimrunner::Server.new(:executable => "/path/to/my/specific/vim").start do |vim|
   vim.edit "file.txt"
 end
 ```
