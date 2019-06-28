@@ -116,13 +116,21 @@ module Vimrunner
     #
     # Returns self.
     def kill
-      @r.close
-      @w.close
+      remote_send("<C-\\><C-n>:quitall!<CR>")
 
       begin
-        Process.kill(9, @pid)
-      rescue Errno::ESRCH
+        Timeout.timeout(3, TimeoutError) do
+          sleep 0.1 while Process.waitpid(@pid, Process::WNOHANG).nil?
+        end
+      rescue TimeoutError
+        begin
+          Process.kill("TERM", @pid)
+        rescue Errno::ESRCH
+        end
       end
+
+      @r.close
+      @w.close
 
       self
     end
