@@ -1,4 +1,4 @@
-# Vimrunner [![Build Status](https://secure.travis-ci.org/AndrewRadev/vimrunner.png?branch=master)](http://travis-ci.org/AndrewRadev/vimrunner)
+# Vimrunner [![Build Status](https://secure.travis-ci.org/AndrewRadev/vimrunner.svg?branch=master)](http://travis-ci.org/AndrewRadev/vimrunner)
 
 Using Vim's
 [client/server](http://vimdoc.sourceforge.net/htmldoc/remote.html#clientserver)
