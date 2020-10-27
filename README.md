@@ -12,6 +12,8 @@ The latest stable documentation can be found
 Any issue reports or contributions are very welcome on the
 [GitHub issue tracker](https://github.com/AndrewRadev/Vimrunner/issues).
 
+![Demo](http://i.andrewradev.com/cb035fee68a149c09c3a252fed91b177.gif)
+
 ## Usage
 
 If you don't already have a running Vim server, Vimrunner can be used in one
