@@ -6,13 +6,13 @@ functionality, this library exposes a way to spawn a Vim instance and control
 it programatically. Apart from being a fun party trick, this can be used to do
 integration testing on Vimscript.
 
+![Demo](http://i.andrewradev.com/cb035fee68a149c09c3a252fed91b177.gif)
+
 The latest stable documentation can be found
 [on rubydoc.info](http://rubydoc.info/gems/vimrunner/frames).
 
 Any issue reports or contributions are very welcome on the
 [GitHub issue tracker](https://github.com/AndrewRadev/Vimrunner/issues).
-
-![Demo](http://i.andrewradev.com/cb035fee68a149c09c3a252fed91b177.gif)
 
 ## Usage
 
