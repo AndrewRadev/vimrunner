@@ -20,7 +20,7 @@ module Vimrunner
     VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
     VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
 
-    attr_reader :name, :executable, :vimrc, :gvimrc, :pid
+    attr_reader :name, :full_name, :executable, :vimrc, :gvimrc, :pid
 
     # Public: Initialize a Server
     #
@@ -34,12 +34,18 @@ module Vimrunner
     #           :foreground - Boolean, whether to start Vim with the -f option (optional)
     #                         (default: true).
     #
+    # The `:full_name` attribute reader will provide the name prefixed with the
+    # system's temporary file directory. The reason is that Neovim uses the
+    # "name" as a UNIX domain socket.
+    #
     def initialize(options = {})
       @executable = options.fetch(:executable) { Platform.vim }
       @name       = options.fetch(:name) { "VIMRUNNER#{rand}" }.upcase
       @vimrc      = options.fetch(:vimrc) { VIMRC }
       @gvimrc     = options.fetch(:gvimrc) { "NONE" }
       @foreground = options.fetch(:foreground, true)
+
+      @full_name = File.join(Dir.tmpdir, @name)
     end
 
     # Public: Start a Server. This spawns a background process.
@@ -109,7 +115,7 @@ module Vimrunner
     #
     # Returns a Boolean
     def running?
-      serverlist.include?(name)
+      serverlist.include?(full_name)
     end
 
     # Public: Kills the Vim instance in the background.
@@ -139,7 +145,11 @@ module Vimrunner
     #
     # Returns an Array of String server names currently running.
     def serverlist
-      execute([executable, "--serverlist"]).split("\n")
+      if neovim?
+        execute([executable, "-es", '+"verbose echo string(serverlist())"'])
+      else
+        execute([executable, "--serverlist"]).split("\n")
+      end
     end
 
     # Public: Evaluates an expression in the Vim server and returns the result.
@@ -149,7 +159,11 @@ module Vimrunner
     #
     # Returns the String output of the expression.
     def remote_expr(expression)
-      execute([executable, "--servername", name, "--remote-expr", expression])
+      if neovim?
+        execute([executable, "--server", full_name, "--remote-expr", expression])
+      else
+        execute([executable, "--servername", full_name, "--remote-expr", expression])
+      end
     end
 
     # Public: Sends the given keys
@@ -159,17 +173,23 @@ module Vimrunner
     #
     # Returns nothing.
     def remote_send(keys)
-      execute([executable, "--servername", name, "--remote-send", keys])
+      execute([executable, "--servername", full_name, "--remote-send", keys])
     end
 
     private
+
+    def neovim?
+      executable == 'nvim'
+    end
 
     def foreground_option
       @foreground ? '-f' : ''
     end
 
     def execute(command)
+      puts command.inspect
       out, err, status = Open3.capture3(*command)
+      puts [out, err, status].inspect
       if not err.empty?
         raise ExecutionError.new("Command failed (#{command}), output: #{err}")
       end
@@ -180,7 +200,7 @@ module Vimrunner
     def spawn
       PTY.spawn(executable, *%W[
         #{foreground_option}
-        --servername #{name}
+        --servername #{full_name}
         -u #{vimrc}
         -U #{gvimrc}
         -i NONE

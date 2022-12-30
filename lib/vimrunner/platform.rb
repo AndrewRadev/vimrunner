@@ -25,6 +25,15 @@ module Vimrunner
       vims.find { |vim| suitable?(vim) } or raise NoSuitableVimError
     end
 
+    # Public: Looks for a Neovim executable that's suitable for the current
+    # platform.
+    #
+    # Returns the String Neovim executable.
+    # Raises NoSuitableVimError if no suitable Vim can be found.
+    def nvim
+      nvims.find { |vim| suitable?(vim) } or raise NoSuitableVimError
+    end
+
     # Public: Looks for a GUI Vim executable that's suitable for the current
     # platform.
     #
@@ -48,12 +57,17 @@ module Vimrunner
       %w( vim ) + gvims
     end
 
-    def suitable?(vim)
-      features = features(vim)
+    def nvims
+      %w( nvim )
+    end
 
+    def suitable?(vim)
       if gui?(vim)
-        features.include?("+clientserver")
+        features(vim).include?("+clientserver")
+      elsif neovim?(vim)
+        help(vim).include?("--listen")
       else
+        features = features(vim)
         features.include?("+clientserver") && features.include?("+xterm_clipboard")
       end
     end
@@ -64,8 +78,18 @@ module Vimrunner
       executable[0, 1] == "g" || executable[0, 1] == "m"
     end
 
+    def neovim?(vim)
+      File.basename(vim) == 'nvim'
+    end
+
     def features(vim)
       IO.popen([vim, "--version"]) { |io| io.read.strip }
+    rescue Errno::ENOENT
+      ""
+    end
+
+    def help(vim)
+      IO.popen([vim, "--help"]) { |io| io.read.strip }
     rescue Errno::ENOENT
       ""
     end

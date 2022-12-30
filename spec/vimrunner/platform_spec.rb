@@ -78,5 +78,17 @@ module Vimrunner
         expect(Platform.gvim).to eq("mvim")
       end
     end
+
+    describe "#nvim" do
+      it "raises an error if no suitable nvim could be found" do
+        allow(Platform).to receive(:suitable?).and_return(false)
+        expect { Platform.nvim }.to raise_error(NoSuitableVimError)
+      end
+
+      it "returns nvim executable" do
+        allow(Platform).to receive(:help).and_return("--listen <address>")
+        expect(Platform.nvim).to eq("nvim")
+      end
+    end
   end
 end

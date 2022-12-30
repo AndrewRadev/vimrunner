@@ -47,6 +47,17 @@ module Vimrunner
         end
       end
 
+      it "can start a neovim server process" do
+        begin
+          neovim_server = Server.new(executable: 'nvim')
+          neovim_server.start
+
+          expect(first.serverlist).to include(first.name, second.name)
+        ensure
+          neovim_server.kill
+        end
+      end
+
       it "can start a vim server process with a block" do
         server.start do |client|
           expect(server.serverlist).to include(server.name)
