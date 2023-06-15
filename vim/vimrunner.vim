@@ -7,11 +7,15 @@ if has_error_handling_bugfix
     let output = ''
 
     try
-      redir => output
-      silent exe a:command
-      redir END
+      if exists('*execute')
+        let output = execute(a:command, 'silent')
+      else
+        redir => output
+        silent exe a:command
+        redir END
 
-      let output = s:StripSilencedErrors(output)
+        let output = s:StripSilencedErrors(output)
+      endif
     catch
       let output = v:exception
     endtry
