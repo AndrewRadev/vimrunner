@@ -18,7 +18,7 @@ module Vimrunner
   # to use a Server directly to invoke --remote commands on its Vim instance.
   class Server
     VIMRC        = File.expand_path("../../../vim/vimrc", __FILE__)
-    VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner_rc", __FILE__)
+    VIMRUNNER_RC = File.expand_path("../../../vim/vimrunner.vim", __FILE__)
 
     attr_reader :name, :executable, :vimrc, :gvimrc, :pid
 
