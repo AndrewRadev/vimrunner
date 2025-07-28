@@ -8,4 +8,6 @@ set noswapfile nobackup
 
 " remove default ~/.vim directories to avoid loading plugins
 set runtimepath-=~/.vim
+set runtimepath-=~/.config/vim
 set runtimepath-=~/.vim/after
+set runtimepath-=~/.config/vim/after

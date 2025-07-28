@@ -19,7 +19,7 @@ module Vimrunner
       client.insert 'Contents of the file'
       client.write
 
-      expect(File.exists?('some_file')).to be(true)
+      expect(File.exist?('some_file')).to be(true)
       expect(File.read('some_file').strip).to eq('Contents of the file')
     end
 
@@ -27,7 +27,7 @@ module Vimrunner
       client.edit 'some file'
       client.write
 
-      expect(File.exists?('some file')).to be(true)
+      expect(File.exist?('some file')).to be(true)
     end
 
     it "can execute commands with a bang" do
@@ -37,8 +37,8 @@ module Vimrunner
       client.insert 'Contents of the other file'
       client.command :write
 
-      expect(File.exists?('some_file')).to be(false)
-      expect(File.exists?('some_other_file')).to be(true)
+      expect(File.exist?('some_file')).to be(false)
+      expect(File.exist?('some_other_file')).to be(true)
       expect(File.read('some_other_file').strip).to eq('Contents of the other file')
     end
 
@@ -67,7 +67,7 @@ module Vimrunner
 
     it "can chain several operations" do
       client.edit('some_file').insert('Contents').write
-      expect(File.exists?('some_file')).to be(true)
+      expect(File.exist?('some_file')).to be(true)
       expect(File.read('some_file').strip).to eq('Contents')
     end
 

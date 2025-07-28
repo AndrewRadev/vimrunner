@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.email       = ['andrey.radev@gmail.com']
   s.homepage    = 'http://github.com/AndrewRadev/vimrunner'
   s.summary     = 'Lets you control a Vim instance through Ruby'
+  s.licenses    = ['MIT']
   s.description = <<-D
     Using Vim's client/server functionality, this library exposes a way to
     spawn a Vim instance and control it programatically. Apart from being a fun
@@ -20,7 +21,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 3.7'
 
   s.required_rubygems_version = '>= 1.3.6'
-  s.rubyforge_project         = 'vimrunner'
   s.files                     = Dir['lib/**/*.rb', 'vim/*', 'bin/*', 'LICENSE', '*.md']
   s.require_path              = 'lib'
   s.executables               = ['vimrunner']
