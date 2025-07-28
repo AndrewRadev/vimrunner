@@ -45,7 +45,11 @@ module Vimrunner
       @gvimrc     = options.fetch(:gvimrc) { "NONE" }
       @foreground = options.fetch(:foreground, true)
 
-      @full_name = File.join(Dir.tmpdir, @name)
+      if neovim?
+        @full_name = File.join(Dir.tmpdir, @name)
+      else
+        @full_name = @name
+      end
     end
 
     # Public: Start a Server. This spawns a background process.
@@ -146,7 +150,7 @@ module Vimrunner
     # Returns an Array of String server names currently running.
     def serverlist
       if neovim?
-        execute([executable, "-es", '+"verbose echo string(serverlist())"'])
+        execute([executable, "-es", '+"verbose echo string(serverlist({''peer'': 1}))"'])
       else
         execute([executable, "--serverlist"]).split("\n")
       end
@@ -187,9 +191,7 @@ module Vimrunner
     end
 
     def execute(command)
-      puts command.inspect
       out, err, status = Open3.capture3(*command)
-      puts [out, err, status].inspect
       if not err.empty?
         raise ExecutionError.new("Command failed (#{command}), output: #{err}")
       end
